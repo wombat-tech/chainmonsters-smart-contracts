@@ -3,8 +3,6 @@
 ## ToDo:
 
 - Figure out a better naming scheme for Rewards<--->NFTs
-- implement season based rewards properly
-- provide full metadata overview
 - add events to ReadMe
 
 ## Introduction
@@ -50,6 +48,10 @@ pub resource Reward {
 
     // the ID of the Reward that the NFT comes from
     pub let rewardID: UInt32
+    
+    // the game-season this reward belongs to
+    // Kickstarter NFTs are Pre-Season and equal 0
+    pub let season: UInt32
 
     // the place in the edition that this NFT was minted
     // Otherwise known as the serial number
@@ -68,6 +70,8 @@ Metadata structs associated with rewards are stored in the main smart contract a
 The power to create new Rewards, Seasons and NFTs rests with the owner of the Admin resource.
 
 Admins create rewards based on a Season which are stored in the main smart contract, from those rewards, NFTs can then be minted from.
+
+Most rewards - with the exception of e.g. Kickstarter/Presale NFTs - do not have a fixed initial total supply since they should be obtainable by all players during a particular Season.
 
 Admins can end the current season which locks the ability to mint new NFTs from existing Rewards. This cannot be reversed.
 
