@@ -240,12 +240,18 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         
         // creates a new Reward struct and stores it in the Rewards dictionary
         // Parameters: metadata: the name of the reward
-        pub fun createReward(metadata: String, supplyCap: UInt32): UInt32 {
+        pub fun createReward(metadata: String, totalSupply: UInt32): UInt32 {
             // Create the new Reward
             var newReward = Reward(metadata: metadata)
             let newID = newReward.rewardID;
 
-            ChainmonstersRewards.rewardSupplies[newID] = supplyCap
+            // Kickstarter rewards are created with a fixed total supply.
+            // Future season rewards are not technically limited by a total supply
+            // but rather the time limitations in which a player can earn those.
+            // Once a season is over the total supply for those rewards is fixed since
+            // they can no longer be minted.
+
+            ChainmonstersRewards.rewardSupplies[newID] = totalSupply
             ChainmonstersRewards.numberMintedPerReward[newID] = 0
             ChainmonstersRewards.rewardSeasons[newID] = newReward.season
 
@@ -262,8 +268,8 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
                 // check if the reward is still in "season"
                 ChainmonstersRewards.rewardSeasons[rewardID] == ChainmonstersRewards.currentSeason
-                // check if total supply allows additional NFTs
-                ChainmonstersRewards.numberMintedPerReward[rewardID] != ChainmonstersRewards.rewardSupplies[rewardID]
+                // check if total supply allows additional NFTs || ignore if there is no hard cap specified == 0
+                ChainmonstersRewards.numberMintedPerReward[rewardID] != ChainmonstersRewards.rewardSupplies[rewardID] || ChainmonstersRewards.rewardSupplies[rewardID] == UInt32(0)
 
             }
 
