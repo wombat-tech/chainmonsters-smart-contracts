@@ -4,7 +4,7 @@
 
 import NonFungibleToken from 0xNFTADDRESS
 
-pub contract ChainmonstersNFT: NonFungibleToken {
+pub contract ChainmonstersRewards: NonFungibleToken {
 
     pub var totalSupply: UInt64
 
@@ -12,20 +12,26 @@ pub contract ChainmonstersNFT: NonFungibleToken {
     pub event Withdraw(id: UInt64, from: Address?)
     pub event Deposit(id: UInt64, to: Address?)
 
-    pub event RewardCreated(id: UInt32, metadata: {String:String})
+    pub event RewardCreated(id: UInt32, metadata: String, season: UInt32)
     pub event NFTMinted(NFTID: UInt64, rewardID: UInt32, serialNumber: UInt32)
+    pub event NewSeasonStarted(newCurrentSeason: UInt32)
 
     pub var nextRewardID: UInt32
 
     // Variable size dictionary of Reward structs
-    // TBD: Do we re-use this contract here for the Pre-Season Pass??
-    // Or do we stay with the KS only NFTs
     access(self) var rewardDatas: {UInt32: Reward}
     access(self) var rewardSupplies: {UInt32: UInt32}
+    access(self) var rewardSeasons: {UInt32 : UInt32}
 
     // a mapping of Reward IDs that indicates what serial/mint number
     // have been minted for this specific Reward yet
     pub var numberMintedPerReward: {UInt32: UInt32}
+
+    // the season a reward belongs to
+    // A season is a concept where rewards are obtainable in-game for a limited time
+    // After a season is over the rewards can no longer be minted and thus create
+    // scarcity and drive the player-driven economy over time.
+    pub var currentSeason: UInt32
 
 
 
@@ -39,22 +45,27 @@ pub contract ChainmonstersNFT: NonFungibleToken {
         // The unique ID for the Reward
         pub let rewardID: UInt32
 
-        // Stores all the metadata about the reward as a string mapping
-        // Blatantly "inspired" by TopShots due to lack of better solution for now.
-        //
-        pub let metadata: {String: String}
+        // the game-season this reward belongs to
+        // Kickstarter NFTs are Pre-Season and equal 0
+        pub let season: UInt32
 
-        init(metadata: {String: String}) {
+        // The metadata for the rewards is restricted to the name since
+        // all other data is inside the token itself already
+        // visual stuff and descriptions need to be retrieved via API
+        pub let metadata: String
+
+        init(metadata: String) {
             pre {
                 metadata.length != 0: "New Reward metadata cannot be empty"
             }
-            self.rewardID = ChainmonstersNFT.nextRewardID
+            self.rewardID = ChainmonstersRewards.nextRewardID
             self.metadata = metadata
+            self.season = ChainmonstersRewards.currentSeason;
 
             // Increment the ID so that it isn't used again
-            ChainmonstersNFT.nextRewardID = ChainmonstersNFT.nextRewardID + UInt32(1)
+            ChainmonstersRewards.nextRewardID = ChainmonstersRewards.nextRewardID + UInt32(1)
 
-            emit RewardCreated(id: self.rewardID, metadata: metadata)
+            emit RewardCreated(id: self.rewardID, metadata: metadata, season: self.season)
         }
     }
 
@@ -84,9 +95,9 @@ pub contract ChainmonstersNFT: NonFungibleToken {
 
         init(serialNumber: UInt32, rewardID: UInt32) {
             // Increment the global NFT IDs
-            ChainmonstersNFT.totalSupply = ChainmonstersNFT.totalSupply + UInt64(1)
+            ChainmonstersRewards.totalSupply = ChainmonstersRewards.totalSupply + UInt64(1)
             
-            self.id = ChainmonstersNFT.totalSupply 
+            self.id = ChainmonstersRewards.totalSupply 
 
             self.data = NFTData(rewardID: rewardID, serialNumber: serialNumber)
 
@@ -102,7 +113,7 @@ pub contract ChainmonstersNFT: NonFungibleToken {
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowReward(id: UInt64): &ChainmonstersNFT.NFT? {
+        pub fun borrowReward(id: UInt64): &ChainmonstersRewards.NFT? {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
@@ -159,7 +170,7 @@ pub contract ChainmonstersNFT: NonFungibleToken {
         // deposit takes a NFT and adds it to the collections dictionary
         // and adds the ID to the id array
         pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @ChainmonstersNFT.NFT
+            let token <- token as! @ChainmonstersRewards.NFT
 
             let id: UInt64 = token.id
 
@@ -204,10 +215,10 @@ pub contract ChainmonstersNFT: NonFungibleToken {
         // Parameters: id: The ID of the NFT to get the reference for
         //
         // Returns: A reference to the NFT
-        pub fun borrowReward(id: UInt64): &ChainmonstersNFT.NFT? {
+        pub fun borrowReward(id: UInt64): &ChainmonstersRewards.NFT? {
             if self.ownedNFTs[id] != nil {
                 let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &ChainmonstersNFT.NFT
+                return ref as! &ChainmonstersRewards.NFT
             } else {
                 return nil
             }
@@ -228,18 +239,17 @@ pub contract ChainmonstersNFT: NonFungibleToken {
 
         
         // creates a new Reward struct and stores it in the Rewards dictionary
-        // Parameters: metadata: A dictionary mapping metadata titles to their data
-        //                       example: {"Name": "Alpha Access", "Season": "Pre-Season"}
-        //
-        pub fun createReward(metadata: {String: String}, supplyCap: UInt32): UInt32 {
+        // Parameters: metadata: the name of the reward
+        pub fun createReward(metadata: String, supplyCap: UInt32): UInt32 {
             // Create the new Reward
             var newReward = Reward(metadata: metadata)
             let newID = newReward.rewardID;
 
-            ChainmonstersNFT.rewardSupplies[newID] = supplyCap
-            ChainmonstersNFT.numberMintedPerReward[newID] = 0
+            ChainmonstersRewards.rewardSupplies[newID] = supplyCap
+            ChainmonstersRewards.numberMintedPerReward[newID] = 0
+            ChainmonstersRewards.rewardSeasons[newID] = newReward.season
 
-            ChainmonstersNFT.rewardDatas[newID] = newReward
+            ChainmonstersRewards.rewardDatas[newID] = newReward
 
             return newID
         }
@@ -249,32 +259,47 @@ pub contract ChainmonstersNFT: NonFungibleToken {
 		// 
 		pub fun mintReward(rewardID: UInt32): @NFT {
             pre {
-              // check if total supply allows additional NFTs
-              ChainmonstersNFT.numberMintedPerReward[rewardID] != ChainmonstersNFT.rewardSupplies[rewardID]
+
+                // check if the reward is still in "season"
+                ChainmonstersRewards.rewardSeasons[rewardID] == ChainmonstersRewards.currentSeason
+                // check if total supply allows additional NFTs
+                ChainmonstersRewards.numberMintedPerReward[rewardID] != ChainmonstersRewards.rewardSupplies[rewardID]
+
             }
 
             // Gets the number of NFTs that have been minted for this Reward
             // to use as this NFT's serial number
-            let numInReward = ChainmonstersNFT.numberMintedPerReward[rewardID]!
+            let numInReward = ChainmonstersRewards.numberMintedPerReward[rewardID]!
 
             // Mint the new NFT
             let newReward: @NFT <- create NFT(serialNumber: numInReward + UInt32(1),
                                               rewardID: rewardID)
 
             // Increment the count of NFTs minted for this Reward
-            ChainmonstersNFT.numberMintedPerReward[rewardID] = numInReward + UInt32(1)
+            ChainmonstersRewards.numberMintedPerReward[rewardID] = numInReward + UInt32(1)
 
             return <-newReward
 		}
 
         pub fun borrowReward(rewardID: UInt32): &Reward {
             pre {
-                ChainmonstersNFT.rewardDatas[rewardID] != nil: "Cannot borrow Reward: The Reward doesn't exist"
+                ChainmonstersRewards.rewardDatas[rewardID] != nil: "Cannot borrow Reward: The Reward doesn't exist"
             }
             
             // Get a reference to the Set and return it
             // use `&` to indicate the reference to the object and type
-            return &ChainmonstersNFT.rewardDatas[rewardID] as &Reward
+            return &ChainmonstersRewards.rewardDatas[rewardID] as &Reward
+        }
+
+
+        // ends the current season by incrementing the season number
+        // Rewards minted after this will use the new season number.
+        pub fun startNewSeason(): UInt32 {
+            ChainmonstersRewards.currentSeason = ChainmonstersRewards.currentSeason + UInt32(1)
+
+            emit NewSeasonStarted(newCurrentSeason: ChainmonstersRewards.currentSeason)
+
+            return ChainmonstersRewards.currentSeason
         }
 
 
@@ -288,36 +313,29 @@ pub contract ChainmonstersNFT: NonFungibleToken {
 
 
     // -----------------------------------------------------------------------
-    // ChainmonstersNFT contract-level function definitions
+    // ChainmonstersRewards contract-level function definitions
     // -----------------------------------------------------------------------
 
     // public function that anyone can call to create a new empty collection
     // This is required to receive Rewards in transactions.
     pub fun createEmptyCollection(): @NonFungibleToken.Collection {
-        return <- create ChainmonstersNFT.Collection()
+        return <- create ChainmonstersRewards.Collection()
     }
 
     // returns all the rewards setup in this contract
-    pub fun getAllRewards(): [ChainmonstersNFT.Reward] {
-        return ChainmonstersNFT.rewardDatas.values
+    pub fun getAllRewards(): [ChainmonstersRewards.Reward] {
+        return ChainmonstersRewards.rewardDatas.values
     }
 
     // returns returns all the metadata associated with a specific Reward
-    pub fun getRewardMetaData(rewardID: UInt32): {String: String}? {
+    pub fun getRewardMetaData(rewardID: UInt32): String? {
         return self.rewardDatas[rewardID]?.metadata
     }
 
-    // getRewardMetaDataByField returns the metadata associated with a 
-    //                        specific field of the metadata
-    //                        Ex: field: "Name" will return something
-    //                        like "Alpha Access"
-    pub fun getRewardMetaDataByField(rewardID: UInt32, field: String): String? {
-        // Don't force a revert if the rewardID or field is invalid
-        if let reward = ChainmonstersNFT.rewardDatas[rewardID] {
-            return reward.metadata[field]
-        } else {
-            return nil
-        }
+
+    // returns the season this specified reward belongs to
+    pub fun getRewardSeason(rewardID: UInt32): UInt32? {
+        return ChainmonstersRewards.rewardDatas[rewardID]?.season
     }
 
 
@@ -330,7 +348,7 @@ pub contract ChainmonstersNFT: NonFungibleToken {
     // Returns: Boolean indicating if the reward is locked or not
     pub fun isRewardLocked(rewardID: UInt32): Bool? {
         // Don't force a revert if the reward is invalid
-        if (ChainmonstersNFT.rewardSupplies[rewardID] == ChainmonstersNFT.numberMintedPerReward[rewardID]) {
+        if (ChainmonstersRewards.rewardSupplies[rewardID] == ChainmonstersRewards.numberMintedPerReward[rewardID]) {
 
             return true
         } else {
@@ -342,7 +360,7 @@ pub contract ChainmonstersNFT: NonFungibleToken {
 
     // returns the number of Rewards that have been minted already
     pub fun getNumRewardsMinted(rewardID: UInt32): UInt32? {
-        let amount = ChainmonstersNFT.numberMintedPerReward[rewardID]
+        let amount = ChainmonstersRewards.numberMintedPerReward[rewardID]
 
         return amount
     }
@@ -356,6 +374,8 @@ pub contract ChainmonstersNFT: NonFungibleToken {
         self.totalSupply = 0
         self.rewardSupplies = {}
         self.numberMintedPerReward = {}
+        self.currentSeason = 0
+        self.rewardSeasons = {}
 
          // Put a new Collection in storage
         self.account.save<@Collection>(<- create Collection(), to: /storage/RewardCollection)
@@ -370,4 +390,5 @@ pub contract ChainmonstersNFT: NonFungibleToken {
 	}
 }
 
+ 
  
