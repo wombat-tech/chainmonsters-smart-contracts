@@ -1,4 +1,4 @@
-import ChainmonstersNFT from 0xCHAINMONSTERS
+import ChainmonstersRewards from 0xCHAINMONSTERS
 
 // This transaction is what an admin would use to mint a single new NFT
 // and deposit it in a user's collection
@@ -11,11 +11,11 @@ import ChainmonstersNFT from 0xCHAINMONSTERS
 
 transaction(rewardID: UInt32, recipientAddr: Address) {
     // local variable for the admin reference
-    let adminRef: &ChainmonstersNFT.Admin
+    let adminRef: &ChainmonstersRewards.Admin
 
     prepare(acct: AuthAccount) {
         // borrow a reference to the Admin resource in storage
-        self.adminRef = acct.borrow<&ChainmonstersNFT.Admin>(from: /storage/ChainmonstersAdmin)!
+        self.adminRef = acct.borrow<&ChainmonstersRewards.Admin>(from: /storage/ChainmonstersAdmin)!
     }
 
     execute {
@@ -29,7 +29,7 @@ transaction(rewardID: UInt32, recipientAddr: Address) {
         let recipient = getAccount(recipientAddr)
 
         // get the Collection reference for the receiver
-        let receiverRef = recipient.getCapability(/public/RewardCollection)!.borrow<&{ChainmonstersNFT.RewardCollectionPublic}>()
+        let receiverRef = recipient.getCapability(/public/RewardCollection)!.borrow<&{ChainmonstersRewards.RewardCollectionPublic}>()
             ?? panic("Cannot borrow a reference to the recipient's reward collection")
 
         // deposit the NFT in the receivers collection
