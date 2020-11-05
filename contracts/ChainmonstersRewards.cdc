@@ -287,6 +287,20 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             return <-newReward
 		}
 
+        // batchMintReward mints an arbitrary quantity of Rewards 
+        // 
+        pub fun batchMintReward(rewardID: UInt32, quantity: UInt64): @Collection {
+            let newCollection <- create Collection()
+
+            var i: UInt64 = 0
+            while i < quantity {
+                newCollection.deposit(token: <-self.mintReward(rewardID: rewardID))
+                i = i + UInt64(1)
+            }
+
+            return <-newCollection
+        }
+
         pub fun borrowReward(rewardID: UInt32): &Reward {
             pre {
                 ChainmonstersRewards.rewardDatas[rewardID] != nil: "Cannot borrow Reward: The Reward doesn't exist"
