@@ -1,4 +1,4 @@
-import ChainmonstersNFT from 0xCHAINMONSTERS
+import ChainmonstersRewards from 0xCHAINMONSTERS
 
 
 // Parameters:
@@ -14,7 +14,7 @@ transaction(recipient: Address, withdrawID: UFix64) {
     prepare(acct: AuthAccount) {
 
         // borrow a reference to the owner's collection
-        let collectionRef = acct.borrow<&ChainmonstersNFT.RewardCollectionPublic>(from: /storage/RewardCollection)
+        let collectionRef = acct.borrow<&ChainmonstersNFT.ChainmonstersRewardCollectionPublic>(from: /storage/ChainmonstersRewardCollection)
             ?? panic("Could not borrow a reference to the stored Reward collection")
         
         // withdraw the NFT
@@ -26,7 +26,7 @@ transaction(recipient: Address, withdrawID: UFix64) {
         let recipient = getAccount(recipient)
 
         // get the Collection reference for the receiver
-        let receiverRef = recipient.getCapability(/public/RewardCollection)!.borrow<&{ChainmonstersNFT.RewardCollectionPublic}>()!
+        let receiverRef = recipient.getCapability(/public/ChainmonstersRewardCollection)!.borrow<&{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>()!
 
         // deposit the NFT in the receivers collection
         receiverRef.deposit(token: <-self.transferToken)

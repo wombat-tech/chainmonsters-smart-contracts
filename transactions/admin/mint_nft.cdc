@@ -29,7 +29,7 @@ transaction(rewardID: UInt32, recipientAddr: Address) {
         let recipient = getAccount(recipientAddr)
 
         // get the Collection reference for the receiver
-        let receiverRef = recipient.getCapability(/public/RewardCollection)!.borrow<&{ChainmonstersRewards.RewardCollectionPublic}>()
+        let receiverRef = recipient.getCapability(/public/ChainmonstersRewardCollection)!.borrow<&{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>()
             ?? panic("Cannot borrow a reference to the recipient's reward collection")
 
         // deposit the NFT in the receivers collection

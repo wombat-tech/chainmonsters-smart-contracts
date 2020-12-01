@@ -1,9 +1,9 @@
-import Chainmonsters from 0xChainmonsters
+import ChainmonstersRewards from 0xChainmonsters
 
 
 pub fun main(account: Address, id: UInt64): Bool {
-    let collectionRef = getAccount(account).getCapability(/public/RewardCollection)!
-        .borrow<&{ChainmonstersReward.RewardCollectionPublic}>()
+    let collectionRef = getAccount(account).getCapability(/public/ChainmonstersRewardCollection)!
+        .borrow<&{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>()
         ?? panic("Could not get public reward collection reference")
 
     return collectionRef.borrowNFT(id: id) != nil

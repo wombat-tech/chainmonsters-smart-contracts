@@ -108,7 +108,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     // This is the interface that users can cast their Reward Collection as
     // to allow others to deposit Rewards into their Collection. It also allows for reading
     // the IDs of Rewards in the Collection.
-    pub resource interface RewardCollectionPublic {
+    pub resource interface ChainmonstersRewardCollectionPublic {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun batchDeposit(tokens: @NonFungibleToken.Collection)
         pub fun getIDs(): [UInt64]
@@ -124,7 +124,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     }
 
 
-    pub resource Collection: RewardCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: ChainmonstersRewardCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an `UInt64` ID field
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -398,10 +398,10 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         self.rewardSeasons = {}
 
          // Put a new Collection in storage
-        self.account.save<@Collection>(<- create Collection(), to: /storage/RewardCollection)
+        self.account.save<@Collection>(<- create Collection(), to: /storage/ChainmonstersRewardCollection)
 
         // Create a public capability for the Collection
-        self.account.link<&{RewardCollectionPublic}>(/public/RewardCollection, target: /storage/RewardCollection)
+        self.account.link<&{ChainmonstersRewardCollectionPublic}>(/public/ChainmonstersRewardCollection, target: /storage/ChainmonstersRewardCollection)
 
         // Put the Minter in storage
         self.account.save<@Admin>(<- create Admin(), to: /storage/ChainmonstersAdmin)

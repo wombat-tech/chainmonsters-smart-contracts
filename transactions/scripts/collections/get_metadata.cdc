@@ -5,8 +5,8 @@ pub fun main(account: Address, id: UInt64): {String: String} {
 
     // get the public capability for the owner's reward collection
     // and borrow a reference to it
-    let collectionRef = getAccount(account).getCapability(/public/RewardCollection)!
-        .borrow<&{ChainmonstersRewards.RewardCollectionPublic}>()
+    let collectionRef = getAccount(account).getCapability(/public/ChainmonstersRewardCollection)!
+        .borrow<&{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>()
         ?? panic("Could not get public reward collection reference")
 
     // Borrow a reference to the specified reward
