@@ -292,9 +292,8 @@ import NonFungibleToken from 0xNFT
         }
     
         init () {
-            //FIXME: REMOVE SUFFIX BEFORE RELEASE
-            self.CollectionStoragePath = /storage/chainmonstersRewardsMarketCollection001
-            self.CollectionPublicPath = /public/chainmonstersRewardsMarketCollection001
+            self.CollectionStoragePath = /storage/chainmonstersRewardsMarketCollection
+            self.CollectionPublicPath = /public/chainmonstersRewardsMarketCollection
         }
     }
     
