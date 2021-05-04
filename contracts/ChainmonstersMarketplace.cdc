@@ -31,9 +31,9 @@ import NonFungibleToken from 0xNFT
         // SaleOffer events.
         //
         // A sale offer has been created.
-        pub event SaleOfferCreated(itemID: UInt64, price: UFix64)
+        pub event SaleOfferCreated(itemID: UInt64, price: UFix64, seller: Address)
         // Someone has purchased an item that was offered for sale.
-        pub event SaleOfferAccepted(itemID: UInt64)
+        pub event SaleOfferAccepted(itemID: UInt64, buyer: Address)
         // A sale offer has been destroyed, with or without being accepted.
         pub event SaleOfferFinished(itemID: UInt64)
         
@@ -104,7 +104,7 @@ import NonFungibleToken from 0xNFT
                 let nft <- self.sellerItemProvider.borrow()!.withdraw(withdrawID: self.saleItemID)
                 buyerCollection.deposit(token: <-nft)
     
-                emit SaleOfferAccepted(itemID: self.saleItemID)
+                emit SaleOfferAccepted(itemID: self.saleItemID, buyer: self.owner.address)
             }
     
             // destructor
@@ -141,7 +141,7 @@ import NonFungibleToken from 0xNFT
 
                 self.marketFeeReceiver = marketFeeReceiver;
     
-                emit SaleOfferCreated(itemID: self.saleItemID, price: self.salePrice)
+                emit SaleOfferCreated(itemID: self.saleItemID, price: self.salePrice, seller: self.owner.address)
             }
         }
     
