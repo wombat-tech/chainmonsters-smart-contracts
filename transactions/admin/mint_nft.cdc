@@ -1,4 +1,4 @@
-import ChainmonstersRewards from 0xCHAINMONSTERS
+import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
 
 // This transaction is what an admin would use to mint a single new NFT
 // and deposit it in a user's collection

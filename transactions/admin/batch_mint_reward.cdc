@@ -1,4 +1,4 @@
-import ChainmonstersRewards from 0xCHAINMONSTERS
+import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
 
 // This transaction mints multiple nfts from a single reward 
 

@@ -1,4 +1,4 @@
-import ChainmonstersRewards from 0xCHAINMONSTERS
+import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
 
 // creating a reward and setting the total supply
 

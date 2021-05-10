@@ -1,4 +1,4 @@
-import ChainmonstersRewards from 0xCHAINMONSTERS
+import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
 
 // This transaction sets up an account to use Chainmonsters
 // by storing an empty NFT collection and creating

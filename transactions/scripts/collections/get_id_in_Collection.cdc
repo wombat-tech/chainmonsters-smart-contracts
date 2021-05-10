@@ -1,4 +1,4 @@
-import ChainmonstersRewards from 0xChainmonsters
+import ChainmonstersRewards from "../../../contracts/ChainmonstersRewards.cdc"
 
 
 pub fun main(account: Address, id: UInt64): Bool {

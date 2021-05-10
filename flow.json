@@ -1,10 +1,49 @@
 {
-	"accounts": {
-		"service": {
-			"address": "f8d6e0586b0a20c7",
-			"privateKey": "016148c08c94e872f418f3f2cbac5dbc2b34a2a31f9e4ddd8e18f13094d19289",
-			"sigAlgorithm": "ECDSA_P256",
-			"hashAlgorithm": "SHA3_256"
-		}
-	}
+  "contracts": {
+    "NonFungibleToken": "./contracts/lib/NonFungibleToken.cdc",
+    "FUSD": {
+      "source": "./contracts/lib/FUSD.cdc",
+      "aliases": {
+        "testnet": "e223d8a629e49c68"
+      }
+    },
+    "ChainmonstersRewards": "./contracts/ChainmonstersRewards.cdc",
+    "ChainmonstersMarketplace": "./contracts/ChainmonstersMarketplace.cdc",
+    "FungibleToken": {
+      "source": "./contracts/lib/FungibleToken.cdc",
+      "aliases": {
+        "testnet": "9a0766d93b6608b7",
+        "emulator": "ee82856bf20e2aa6"
+      }
+    }
+  },
+  "deployments": {
+    "emulator": {
+      "emulator-account": [
+        "NonFungibleToken",
+        {
+          "name": "FUSD"
+        },
+        "ChainmonstersRewards",
+        "ChainmonstersMarketplace"
+      ]
+    }
+  },
+  "accounts": {
+    "emulator-account": {
+      "address": "f8d6e0586b0a20c7",
+      "keys": "6109383a7ee4fa5705958baed0f6c46a7b5652aae0642f333e508cf96de1f424"
+    }
+  },
+  "networks": {
+    "emulator": "127.0.0.1:3569",
+    "mainnet": "access.mainnet.nodes.onflow.org:9000",
+    "testnet": "access.devnet.nodes.onflow.org:9000"
+  },
+  "emulators": {
+    "default": {
+      "port": 3569,
+      "serviceAccount": "emulator-account"
+    }
+  }
 }
