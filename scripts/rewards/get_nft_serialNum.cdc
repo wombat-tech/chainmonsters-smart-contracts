@@ -1,4 +1,4 @@
-import ChainmonstersRewards from "../../../contracts/ChainmonstersRewards.cdc"
+import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
 
 pub fun main(account: Address, id: UInt64): UInt32 {
     let collectionRef = getAccount(account).getCapability(/public/ChainmonstersRewardCollection)!

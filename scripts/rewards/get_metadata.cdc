@@ -1,7 +1,7 @@
-import ChainmonstersRewards from "../../../contracts/ChainmonstersRewards.cdc"
+import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
 
 
-pub fun main(account: Address, id: UInt64): {String: String} {
+pub fun main(account: Address, id: UInt64): String {
 
     // get the public capability for the owner's reward collection
     // and borrow a reference to it
@@ -19,8 +19,6 @@ pub fun main(account: Address, id: UInt64): {String: String} {
     // Use the NFT's reward ID 
     // to get all the metadata associated with that reward
     let metadata = ChainmonstersRewards.getRewardMetaData(rewardID: data.rewardID) ?? panic("Reward doesn't exist")
-
-    log(metadata)
 
     return metadata
 }

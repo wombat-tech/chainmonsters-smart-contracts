@@ -6,7 +6,7 @@ import NonFungibleToken from "../../contracts/lib/NonFungibleToken.cdc"
 // recipient: The Flow address of the account to receive the NFT.
 // withdrawID: The id of the NFT to be transferred
 
-transaction(recipient: Address, withdrawID: UFix64) {
+transaction(recipient: Address, withdrawID: UInt64) {
 
     // local variable for storing the transferred token
     let transferToken: @NonFungibleToken.NFT
@@ -14,7 +14,7 @@ transaction(recipient: Address, withdrawID: UFix64) {
     prepare(acct: AuthAccount) {
 
         // borrow a reference to the owner's collection
-        let collectionRef = acct.borrow<&ChainmonstersNFT.ChainmonstersRewardCollectionPublic>(from: /storage/ChainmonstersRewardCollection)
+        let collectionRef = acct.borrow<&ChainmonstersRewards.Collection>(from: /storage/ChainmonstersRewardCollection)
             ?? panic("Could not borrow a reference to the stored Reward collection")
         
         // withdraw the NFT
@@ -26,7 +26,7 @@ transaction(recipient: Address, withdrawID: UFix64) {
         let recipient = getAccount(recipient)
 
         // get the Collection reference for the receiver
-        let receiverRef = recipient.getCapability(/public/ChainmonstersRewardCollection)!.borrow<&{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>()!
+        let receiverRef = recipient.getCapability(/public/ChainmonstersRewardCollection).borrow<&{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>()!
 
         // deposit the NFT in the receivers collection
         receiverRef.deposit(token: <-self.transferToken)

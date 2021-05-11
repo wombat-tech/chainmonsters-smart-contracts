@@ -27,13 +27,13 @@ import ChainmonstersRewards from "./ChainmonstersRewards.cdc"
 
  */
 
-pub contract ChainmonstersMarketplaceV1 {
+pub contract ChainmonstersMarketplace {
     // SaleOffer events.
     //
     // A sale offer has been created.
-    pub event SaleOfferCreated(itemID: UInt64, price: UFix64, seller: Address)
+    pub event SaleOfferCreated(itemID: UInt64, price: UFix64, seller: Address?)
     // Someone has purchased an item that was offered for sale.
-    pub event SaleOfferAccepted(itemID: UInt64, buyer: Address)
+    pub event SaleOfferAccepted(itemID: UInt64, buyer: Address?)
     // A sale offer has been destroyed, with or without being accepted.
     pub event SaleOfferFinished(itemID: UInt64)
     
@@ -104,7 +104,7 @@ pub contract ChainmonstersMarketplaceV1 {
             let nft <- self.sellerItemProvider.borrow()!.withdraw(withdrawID: self.saleItemID)
             buyerCollection.deposit(token: <-nft)
 
-            emit SaleOfferAccepted(itemID: self.saleItemID, buyer: self.owner.address)
+            emit SaleOfferAccepted(itemID: self.saleItemID, buyer: self.owner?.address)
         }
 
         // destructor
@@ -141,7 +141,7 @@ pub contract ChainmonstersMarketplaceV1 {
 
             self.marketFeeReceiver = marketFeeReceiver;
 
-            emit SaleOfferCreated(itemID: self.saleItemID, price: self.salePrice, seller: self.owner.address)
+            emit SaleOfferCreated(itemID: self.saleItemID, price: self.salePrice, seller: self.owner?.address)
         }
     }
 
@@ -170,7 +170,7 @@ pub contract ChainmonstersMarketplaceV1 {
     // use by the collection's owner.
     //
     pub resource interface CollectionManager {
-        pub fun insert(offer: @ChainmonstersMarketplaceV1.SaleOffer)
+        pub fun insert(offer: @ChainmonstersMarketplace.SaleOffer)
         pub fun remove(saleItemID: UInt64): @SaleOffer 
     }
 
@@ -209,7 +209,7 @@ pub contract ChainmonstersMarketplaceV1 {
         // insert
         // Insert a SaleOffer into the collection, replacing one with the same saleItemID if present.
         //
-            pub fun insert(offer: @ChainmonstersMarketplaceV1.SaleOffer) {
+            pub fun insert(offer: @ChainmonstersMarketplace.SaleOffer) {
             let id: UInt64 = offer.saleItemID
 
             // add the new offer to the dictionary which removes the old one

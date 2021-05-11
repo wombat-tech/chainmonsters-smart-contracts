@@ -21,9 +21,7 @@
     "emulator": {
       "emulator-account": [
         "NonFungibleToken",
-        {
-          "name": "FUSD"
-        },
+        "FUSD",
         "ChainmonstersRewards",
         "ChainmonstersMarketplace"
       ]
@@ -33,6 +31,14 @@
     "emulator-account": {
       "address": "f8d6e0586b0a20c7",
       "keys": "6109383a7ee4fa5705958baed0f6c46a7b5652aae0642f333e508cf96de1f424"
+    },
+    "seller-account": {
+      "address": "01cf0e2f2f715450",
+      "keys": "8e507bc80e2c5811ac45fa8e9e55ae8f8f18aa556f17cc8ee6eb67ed5bf9be28"
+    },
+    "buyer-account": {
+      "address": "179b6b1cb6755e31",
+      "keys": "420ee2b00c1446c64950ed4f989d96a3d863e1920d0ec9f4508e01e72dd05aeb"
     }
   },
   "networks": {
