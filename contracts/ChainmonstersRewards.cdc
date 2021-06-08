@@ -2,7 +2,7 @@
 // Based on the "current" NonFungibleToken standard on Flow.
 // Does not include that much functionality as the only purpose it to mint and store the Presale NFTs.
 
-import NonFungibleToken from 0xNFTADDRESS
+import NonFungibleToken from "./lib/NonFungibleToken.cdc"
 
 pub contract ChainmonstersRewards: NonFungibleToken {
 
