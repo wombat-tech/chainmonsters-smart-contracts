@@ -1,21 +1,29 @@
 {
   "contracts": {
-    "NonFungibleToken": "./contracts/lib/NonFungibleToken.cdc",
-    "FUSD": {
-      "source": "./contracts/lib/FUSD.cdc",
+    "NonFungibleToken": {
+      "source": "./contracts/lib/NonFungibleToken.cdc",
       "aliases": {
-        "testnet": "e223d8a629e49c68"
+        "testnet": "631e88ae7f1d7c20",
+        "mainnet": "1d7e57aa55817448"
       }
     },
-    "ChainmonstersRewards": "./contracts/ChainmonstersRewards.cdc",
-    "ChainmonstersMarketplace": "./contracts/ChainmonstersMarketplace.cdc",
     "FungibleToken": {
       "source": "./contracts/lib/FungibleToken.cdc",
       "aliases": {
+        "emulator": "ee82856bf20e2aa6",
         "testnet": "9a0766d93b6608b7",
-        "emulator": "ee82856bf20e2aa6"
+        "mainnet": "f233dcee88fe0abe"
       }
-    }
+    },
+    "FUSD": {
+      "source": "./contracts/lib/FUSD.cdc",
+      "aliases": {
+        "testnet": "e223d8a629e49c68",
+        "mainnet": "3c5959b568896393"
+      }
+    },
+    "ChainmonstersRewards": "./contracts/ChainmonstersRewards.cdc",
+    "ChainmonstersMarketplace": "./contracts/ChainmonstersMarketplace.cdc"
   },
   "deployments": {
     "emulator": {
@@ -25,6 +33,9 @@
         "ChainmonstersRewards",
         "ChainmonstersMarketplace"
       ]
+    },
+    "testnet": {
+      "testnet-deployer": ["ChainmonstersRewards", "ChainmonstersMarketplace"]
     }
   },
   "accounts": {
@@ -39,6 +50,14 @@
     "buyer-account": {
       "address": "179b6b1cb6755e31",
       "keys": "420ee2b00c1446c64950ed4f989d96a3d863e1920d0ec9f4508e01e72dd05aeb"
+    },
+    "testnet-deployer": {
+      "address": "75783e3c937304a8",
+      "keys": "$TESTNET_DEPLOYER_PRIVATE_KEY"
+    },
+    "testnet-user": {
+      "address": "$TESTNET_USER_ADDRESS",
+      "keys": "$TESTNET_USER_PRIVATE_KEY"
     }
   },
   "networks": {

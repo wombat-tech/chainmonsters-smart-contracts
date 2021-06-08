@@ -143,3 +143,9 @@ Address: `179b6b1cb6755e31`
    > Should be `10338.0`
 
 Done 🎉
+
+# Testnet Setup
+
+The contracts have been done on testnet at `0x75783e3c937304a8`.
+
+You have to execute all setup transactions yourself for your testaccounts.

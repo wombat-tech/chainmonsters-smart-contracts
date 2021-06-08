@@ -31,9 +31,9 @@ pub contract ChainmonstersMarketplace {
     // SaleOffer events.
     //
     // A sale offer has been created.
-    pub event SaleOfferCreated(itemID: UInt64, price: UFix64, seller: Address?)
+    pub event SaleOfferCreated(itemID: UInt64, price: UFix64)
     // Someone has purchased an item that was offered for sale.
-    pub event SaleOfferAccepted(itemID: UInt64, buyer: Address?)
+    pub event SaleOfferAccepted(itemID: UInt64)
     // A sale offer has been destroyed, with or without being accepted.
     pub event SaleOfferFinished(itemID: UInt64)
     
@@ -68,7 +68,7 @@ pub contract ChainmonstersMarketplace {
         // The ChainmonstersRewards NFT ID for sale.
         pub let saleItemID: UInt64
         // The collection containing that ID.
-        access(self) let sellerItemProvider: Capability<&ChainmonstersRewards.Collection{NonFungibleToken.Provider}>
+        access(self) let sellerItemProvider: Capability<&ChainmonstersRewards.Collection{NonFungibleToken.Provider, ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>
 
         // The sale payment price.
         pub let salePrice: UFix64
@@ -104,7 +104,7 @@ pub contract ChainmonstersMarketplace {
             let nft <- self.sellerItemProvider.borrow()!.withdraw(withdrawID: self.saleItemID)
             buyerCollection.deposit(token: <-nft)
 
-            emit SaleOfferAccepted(itemID: self.saleItemID, buyer: self.owner?.address)
+            emit SaleOfferAccepted(itemID: self.saleItemID)
         }
 
         // destructor
@@ -119,7 +119,7 @@ pub contract ChainmonstersMarketplace {
         // to transfer the ChainmonstersRewards NFT and the capability to receive FUSD in payment.
         //
         init(
-            sellerItemProvider: Capability<&ChainmonstersRewards.Collection{NonFungibleToken.Provider}>,
+            sellerItemProvider: Capability<&ChainmonstersRewards.Collection{NonFungibleToken.Provider, ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>,
             saleItemID: UInt64,
             sellerPaymentReceiver: Capability<&FUSD.Vault{FungibleToken.Receiver}>,
             salePrice: UFix64,
@@ -133,6 +133,12 @@ pub contract ChainmonstersMarketplace {
 
             self.saleCompleted = false
 
+            let collectionRef = sellerItemProvider.borrow()!
+            assert(
+                collectionRef.borrowReward(id: saleItemID) != nil,
+                message: "Specified NFT is not available in the owner's collection"
+            )
+
             self.sellerItemProvider = sellerItemProvider
             self.saleItemID = saleItemID
 
@@ -141,7 +147,7 @@ pub contract ChainmonstersMarketplace {
 
             self.marketFeeReceiver = marketFeeReceiver;
 
-            emit SaleOfferCreated(itemID: self.saleItemID, price: self.salePrice, seller: self.owner?.address)
+            emit SaleOfferCreated(itemID: self.saleItemID, price: self.salePrice)
         }
     }
 
@@ -149,7 +155,7 @@ pub contract ChainmonstersMarketplace {
     // Make creating a SaleOffer publicly accessible.
     //
     pub fun createSaleOffer (
-        sellerItemProvider: Capability<&ChainmonstersRewards.Collection{NonFungibleToken.Provider}>,
+        sellerItemProvider: Capability<&ChainmonstersRewards.Collection{NonFungibleToken.Provider, ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>,
         saleItemID: UInt64,
         sellerPaymentReceiver: Capability<&FUSD.Vault{FungibleToken.Receiver}>,
         marketFeeReceiver: Capability<&FUSD.Vault{FungibleToken.Receiver}>,
