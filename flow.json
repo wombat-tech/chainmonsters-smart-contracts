@@ -22,8 +22,25 @@
         "mainnet": "3c5959b568896393"
       }
     },
-    "ChainmonstersRewards": "./contracts/ChainmonstersRewards.cdc",
-    "ChainmonstersMarketplace": "./contracts/ChainmonstersMarketplace.cdc"
+    "FlowStorageFees": {
+      "source": "./contracts/lib/FlowStorageFees.cdc",
+      "aliases": {
+        "testnet": "8c5303eaa26202d6",
+        "mainnet": "e467b9dd11fa00df"
+      }
+    },
+    "ChainmonstersRewards": {
+      "source": "./contracts/ChainmonstersRewards.cdc",
+      "aliases": {
+        "mainnet": "93615d25d14fa337"
+      }
+    },
+    "ChainmonstersMarketplace": {
+      "source": "./contracts/ChainmonstersMarketplace.cdc",
+      "aliases": {
+        "mainnet": "64f83c60989ce555"
+      }
+    }
   },
   "deployments": {
     "emulator": {
