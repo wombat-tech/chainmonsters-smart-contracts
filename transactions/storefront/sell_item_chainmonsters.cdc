@@ -29,8 +29,9 @@ transaction(nftID: UInt64, price: UFix64) {
   execute {
     ChainmonstersStorefront.createListing(
       storefront: self.storefront, 
-      rewardsProviderCapability: self.rewardsProviderCapability, 
-      fusdVaultCapability: self.fusdVaultCapability, 
+      nftProviderCapability: self.rewardsProviderCapability, 
+      ftReceiverCapability: self.fusdVaultCapability, 
+      tradingPairId: "ChainmonstersReward_FUSD",
       nftID: nftID, 
       price: price
     )

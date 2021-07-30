@@ -8,42 +8,98 @@ pub contract ChainmonstersStorefront {
   pub event ListingAvailable(
     storefrontAddress: Address,
     listingResourceID: UInt64,
+    nftType: Type,
     nftID: UInt64,
+    ftVaultType: Type,
     price: UFix64
   )
 
-  pub let royaltiesPercentage: UFix64
+  // A dictionary of supported trading pairs
+  access(self) var tradingPairs: {String: TradingPair}
 
-  pub let royaltiesReceiver: Capability<&FUSD.Vault{FungibleToken.Receiver}>
+  pub struct TradingPair {
+    pub let nftType: Type
+    pub let ftVaultType: Type
+    pub let royalties: [Royalty]
+
+    pub fun getTotalRoyaltiesPercentage(): UFix64 {
+      var percentageCut: UFix64 = 0.0
+
+      for royalty in self.royalties {
+        percentageCut = percentageCut + royalty.percentage
+      }
+
+      return percentageCut
+    }
+
+    init(nftType: Type, ftVaultType: Type, royalties: [Royalty]) {
+      self.nftType = nftType
+      self.ftVaultType = ftVaultType
+      self.royalties = royalties
+    }
+  }
+
+  pub struct Royalty {
+    pub let receiver: Capability<&{FungibleToken.Receiver}>
+    pub let percentage: UFix64
+
+    init(receiver: Capability<&{FungibleToken.Receiver}>, percentage: UFix64) {
+      self.receiver = receiver
+      self.percentage = percentage
+    }
+  }
+
+  // Admin resource that allows to add or remove supported trading pairs
+  pub resource Admin {
+    pub fun addTradingPair(id: String, nftType: Type, ftVaultType: Type, royalties: [Royalty]) {
+      let pair = TradingPair(nftType: nftType, ftVaultType: ftVaultType, royalties: royalties)
+
+      ChainmonstersStorefront.tradingPairs[id] = pair
+    }
+
+    pub fun removeTradingPair(id: String) {
+      ChainmonstersStorefront.tradingPairs.remove(key: id)
+    }
+
+    pub fun createNewAdmin(): @Admin {
+      return <-create Admin()
+    }
+	}
   
   pub fun createListing(
     storefront: &NFTStorefront.Storefront,
-    rewardsProviderCapability: Capability<&ChainmonstersRewards.Collection{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>,
-    fusdVaultCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>,
+    nftProviderCapability: Capability<&{NonFungibleToken.Provider, NonFungibleToken.CollectionPublic}>,
+    ftReceiverCapability: Capability<&{FungibleToken.Receiver}>,
+    tradingPairId: String,
     nftID: UInt64,
     price: UFix64
   ) {
-    assert(rewardsProviderCapability.borrow()!.borrowNFT(id: nftID) != nil, message: "NFT is not in rewards provider collection")
-    
-    // Calculate royalties and add cuts for the seller and marketplace
-    let royalties = price * self.royaltiesPercentage
+    assert(nftProviderCapability.borrow()!.borrowNFT(id: nftID) != nil, message: "NFT is not in rewards provider collection")
 
-    let saleCut = NFTStorefront.SaleCut(
-      receiver: fusdVaultCapability,
-      amount: price - royalties
-    )
+    let tradingPair = self.getTradingPair(id: tradingPairId)!
 
-    let platformCut = NFTStorefront.SaleCut(
-      receiver: self.royaltiesReceiver,
-      amount: royalties
-    )
+    assert(tradingPair != nil, message: "TradingPair is not supported")
+
+    // Initialize saleCuts array with the seller's cut
+    var saleCuts: [NFTStorefront.SaleCut] = [NFTStorefront.SaleCut(
+      receiver: ftReceiverCapability,
+      amount: price * (1.0 - tradingPair.getTotalRoyaltiesPercentage())
+    )]
+
+    // For each royalty add a SaleCut to the array
+    for royalty in tradingPair.royalties {
+      saleCuts.append(NFTStorefront.SaleCut(
+        receiver: royalty.receiver,
+        amount: price * royalty.percentage
+      ))
+    }
 
     let listingResourceID = storefront.createListing(
-      nftProviderCapability: rewardsProviderCapability,
-      nftType: Type<@ChainmonstersRewards.NFT>(),
+      nftProviderCapability: nftProviderCapability,
+      nftType: tradingPair.nftType,
       nftID: nftID,
-      salePaymentVaultType: Type<@FUSD.Vault>(),
-      saleCuts: [saleCut, platformCut]
+      salePaymentVaultType: tradingPair.ftVaultType,
+      saleCuts: saleCuts
     )
 
     let listing = storefront.borrowListing(listingResourceID: listingResourceID)!
@@ -52,13 +108,20 @@ pub contract ChainmonstersStorefront {
     emit ListingAvailable(
       storefrontAddress: storefront.owner?.address!,
       listingResourceID: listingResourceID,
+      nftType: Type<@ChainmonstersRewards.NFT>(),
       nftID: nftID,
+      ftVaultType: Type<@FUSD.Vault>(),
       price: listing.getDetails().salePrice
     )
   }
 
+  pub fun getTradingPair(id: String): TradingPair? {
+    return self.tradingPairs[id]
+  }
+
   init() {
-    self.royaltiesPercentage = 0.05
-    self.royaltiesReceiver = self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
+    self.tradingPairs = {}
+
+    self.account.save<@Admin>(<- create Admin(), to: /storage/ChainmonstersStorefrontAdmin)
   }
 }
