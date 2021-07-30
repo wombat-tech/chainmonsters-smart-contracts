@@ -7,7 +7,9 @@ import FUSD from "./lib/FUSD.cdc"
 pub contract ChainmonstersStorefront {
   pub event ListingAvailable(
     storefrontAddress: Address,
+    storefrontResourceID: UInt64,
     listingResourceID: UInt64,
+    tradingPairId: String,
     nftType: Type,
     nftID: UInt64,
     ftVaultType: Type,
@@ -64,7 +66,7 @@ pub contract ChainmonstersStorefront {
     pub fun createNewAdmin(): @Admin {
       return <-create Admin()
     }
-	}
+  }
   
   pub fun createListing(
     storefront: &NFTStorefront.Storefront,
@@ -107,7 +109,9 @@ pub contract ChainmonstersStorefront {
     // We emit a custom ListingAvailable event to track "legit" listings with the correct cuts applied
     emit ListingAvailable(
       storefrontAddress: storefront.owner?.address!,
+      storefrontResourceID: storefront.uuid,
       listingResourceID: listingResourceID,
+      tradingPairId: tradingPairId,
       nftType: Type<@ChainmonstersRewards.NFT>(),
       nftID: nftID,
       ftVaultType: Type<@FUSD.Vault>(),
