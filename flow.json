@@ -23,7 +23,8 @@
       }
     },
     "ChainmonstersRewards": "./contracts/ChainmonstersRewards.cdc",
-    "ChainmonstersMarketplace": "./contracts/ChainmonstersMarketplace.cdc"
+    "ChainmonstersMarketplace": "./contracts/ChainmonstersMarketplace.cdc",
+    "ChainmonstersProducts": "./contracts/ChainmonstersProducts.cdc"
   },
   "deployments": {
     "emulator": {
@@ -31,7 +32,8 @@
         "NonFungibleToken",
         "FUSD",
         "ChainmonstersRewards",
-        "ChainmonstersMarketplace"
+        "ChainmonstersMarketplace",
+        "ChainmonstersProducts"
       ]
     },
     "testnet": {
