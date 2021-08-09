@@ -38,19 +38,23 @@ pub contract ChainmonstersProducts {
     }
 
     init(price: UFix64, saleEnabled: Bool, totalSupply: UInt32?, saleEndTime: UFix64?) {
-      self.productID = ChainmonstersProducts.nextProductID
+      let productID = ChainmonstersProducts.nextProductID
+
+      self.productID = productID
       self.price = price
       self.saleEnabled = saleEnabled
       self.totalSupply = totalSupply
       self.saleEndTime = saleEndTime
 
+      // Initialize product sale count to 0
+      ChainmonstersProducts.salesPerProduct[productID] = 0
+
       // Increment global productID counter
-      ChainmonstersProducts.nextProductID = ChainmonstersProducts.nextProductID + 1
+      ChainmonstersProducts.nextProductID = productID + 1
 
       emit ProductCreated(product: self)
     }
   }
-
   
   /**
    * Resources
@@ -105,7 +109,11 @@ pub contract ChainmonstersProducts {
     pub fun createNewAdmin(): @Admin {
         return <-create Admin()
     }
-	}
+  }
+
+  pub fun getProduct(productID: UInt32): Product? {
+    return self.products[productID]
+  }
 
   // Contract Level Functions
   pub fun purchase(
@@ -135,6 +143,9 @@ pub contract ChainmonstersProducts {
 
     // Save receipt to the buyer's collection
     buyerReceiptCollection.saveReceipt(receipt: <- create Receipt(product: product))
+
+    // Increment sales counter for this product
+    self.salesPerProduct[productID] = self.salesPerProduct[productID]! + 1
 
     emit ProductPurchased(product: product, buyer: buyerReceiptCollection.owner?.address)
   }
