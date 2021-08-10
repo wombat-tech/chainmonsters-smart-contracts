@@ -1,4 +1,4 @@
-import { Address, Bool, Optional, UFix64, UInt32, String } from "@onflow/types";
+import { Address, Bool, Optional, String, UFix64, UInt32 } from "@onflow/types";
 import {
   deployContract,
   emulator,
@@ -12,12 +12,12 @@ import {
   init,
   mintFlow,
   sendTransaction,
-  shallRevert,
   shallPass,
+  shallRevert,
 } from "flow-js-testing";
 import path from "path";
 import { getFUSDBalance, mintFUSD, setupFUSDVault } from "./lib/FUSD";
-import { getAddressMap, getBlockTime, sleep, toUFix64 } from "./lib/helpers";
+import { getAddressMap, toUFix64 } from "./lib/helpers";
 
 // We need to set timeout for a higher number, because some transactions might take up some time
 jest.setTimeout(50000);
@@ -285,7 +285,6 @@ describe("ChainmonstersProducts", () => {
     await sendTransaction({
       code: await getTransactionCode({
         name: "fusd/__tests__/destroy_fusd_vault.test",
-        addressMap: {},
       }),
       signers: [Bob],
     });
@@ -353,8 +352,9 @@ describe("ChainmonstersProducts", () => {
   });
 
   test("should not be able to access restricted fields", async () => {
-    const admin = await getServiceAddress();
     const { Alice, Bob, Cecilia } = await setupTestUsers();
+
+    await mintFUSD(Cecilia, 1337);
 
     await createProduct({
       primaryReceiver: Alice,
@@ -368,6 +368,35 @@ describe("ChainmonstersProducts", () => {
         code: await getTransactionCode({
           name: "products/__tests__/manipulate_receipt_collection.test",
         }),
+        signers: [Cecilia],
+      })
+    );
+  });
+
+  test("should allow alternative fungible token payments", async () => {
+    const admin = await getContractAddress("ChainmonstersProducts");
+    const { Alice, Bob, Cecilia } = await setupTestUsers();
+
+    await mintFlow(Cecilia, "9001.0");
+
+    await sendTransaction({
+      code: await getTransactionCode({
+        name: "products/__tests__/create_product_with_flow_payment.test",
+      }),
+      args: [[Alice, Bob, Address]],
+      signers: [admin],
+    });
+
+    const { paymentVaultType } = await getProduct(1);
+
+    expect(paymentVaultType).toMatch(/FlowToken\.Vault$/);
+
+    await shallPass(
+      sendTransaction({
+        code: await getTransactionCode({
+          name: "products/__tests__/purchase_product_with_flow.test",
+        }),
+        args: [[1, UInt32]],
         signers: [Cecilia],
       })
     );
@@ -438,7 +467,6 @@ async function createProduct({
   return sendTransaction({
     code: await getTransactionCode({
       name: "products/__tests__/create_product.test",
-      addressMap: {},
     }),
     args: [
       [primaryReceiver, Address],
@@ -469,6 +497,7 @@ async function setProductSaleEnabled(id: number, saleEnabled: boolean) {
 
 async function getProduct(id: number): Promise<{
   price: number;
+  paymentVaultType: string;
   sales: number;
   saleEndTime?: number;
   metadata?: string;
