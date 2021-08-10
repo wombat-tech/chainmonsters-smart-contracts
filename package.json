@@ -1,0 +1,16 @@
+{
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-typescript": "^7.15.0",
+    "@onflow/fcl": "^0.0.76",
+    "@onflow/types": "^0.0.5",
+    "@types/jest": "^26.0.24",
+    "babel-jest": "^27.0.6",
+    "flow-js-testing": "^0.1.13",
+    "jest": "^27.0.6"
+  },
+  "scripts": {
+    "test": "jest"
+  }
+}

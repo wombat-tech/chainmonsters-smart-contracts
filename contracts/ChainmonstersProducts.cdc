@@ -6,68 +6,151 @@ pub contract ChainmonstersProducts {
   /**
    * Contract events
    */
+
   pub event ContractInitialized()
-  pub event ProductCreated(product: Product)
+  pub event ProductCreated(
+    productID: UInt32, 
+    price: UFix64, 
+    paymentVaultType: Type, 
+    saleEnabled: Bool, 
+    totalSupply: UInt32?, 
+    saleEndTime: UFix64?,
+    metadata: String?
+  )
   pub event ProductSaleChanged(productID: UInt32, saleEnabled: Bool)
-  pub event ProductPurchased(product: Product, buyer: Address?)
+  pub event ProductPurchased(productID: UInt32, buyer: Address?)
 
   /**
    * Contract-level fields
    */
+
   pub let CollectionStoragePath: StoragePath
   pub let CollectionPublicPath: PublicPath
 
+  pub var nextProductID: UInt32
+
   access(self) var products: {UInt32: Product}
   access(self) var salesPerProduct: {UInt32: UInt32}
-  pub var nextProductID: UInt32
-  pub var paymentReceiverCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>
 
   /**
    * Structs
    */
+
   pub struct Product {
     pub let productID: UInt32
 
+    pub let priceCuts: [PriceCut]
     pub let price: UFix64
+    pub let paymentVaultType: Type
     pub var saleEnabled: Bool
     pub let totalSupply: UInt32?
     pub let saleEndTime: UFix64?
+    pub let metadata: String?
 
-    pub fun setSaleEnabled(saleEnabled: Bool) {
+    access(contract) fun setSaleEnabled(saleEnabled: Bool) {
       self.saleEnabled = saleEnabled
     }
 
-    init(price: UFix64, saleEnabled: Bool, totalSupply: UInt32?, saleEndTime: UFix64?) {
+    pub fun getSales(): UInt32 {
+      return ChainmonstersProducts.salesPerProduct[self.productID]!
+    }
+
+    init(priceCuts: [PriceCut], paymentVaultType: Type, saleEnabled: Bool, totalSupply: UInt32?, saleEndTime: UFix64?, metadata: String?) {
+      pre {
+        priceCuts.length > 0: "Product must have at least one price cut"
+      }
+
       let productID = ChainmonstersProducts.nextProductID
 
       self.productID = productID
-      self.price = price
+      self.priceCuts = priceCuts
+      self.paymentVaultType = paymentVaultType
       self.saleEnabled = saleEnabled
       self.totalSupply = totalSupply
       self.saleEndTime = saleEndTime
+      self.metadata = metadata
 
       // Initialize product sale count to 0
       ChainmonstersProducts.salesPerProduct[productID] = 0
 
-      // Increment global productID counter
+      // Increment contract-level productID counter
       ChainmonstersProducts.nextProductID = productID + 1
 
-      emit ProductCreated(product: self)
+      var price = 0.0
+
+      for cut in priceCuts {
+        // Check if the cut receiver vault is available
+        assert(cut.receiver.check(), message: "Price cut receiver capability not available")
+        assert(cut.receiver.borrow()!.isInstance(paymentVaultType), message: "Cut receiver must be of given payment vault type")
+        price = price + cut.amount
+      }
+
+      self.price = price
+
+      emit ProductCreated(
+        productID: self.productID,
+        price: self.price,
+        paymentVaultType: self.paymentVaultType,
+        saleEnabled: self.saleEnabled,
+        totalSupply: self.totalSupply,
+        saleEndTime: self.saleEndTime,
+        metadata: self.metadata
+      )
+    }
+  }
+
+  // A price cut represents a cut of the full product price.
+  pub struct PriceCut {
+    pub let receiver: Capability<&{FungibleToken.Receiver}>
+    pub let amount: UFix64
+
+    init(receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
+      self.receiver = receiver
+      self.amount = amount
     }
   }
   
   /**
    * Resources
    */
-  pub resource ReceiptCollection {
-    pub var receipts: @[Receipt]
 
-    pub fun saveReceipt(receipt: @Receipt) {
-      self.receipts.append(<- receipt)
+  // The receipt collection a user will receive when purchasing a product
+  pub resource ReceiptCollection {
+    access(contract) var receipts: @{UInt64: Receipt}
+
+    // Contract-level function to save a new receipt after purchase
+    access(contract) fun saveReceipt(receipt: @Receipt) {
+      self.receipts[receipt.uuid] <-! receipt
+    }
+
+    // Get all receipt IDs in the collection
+    pub fun getIds(): [UInt64] {
+      return self.receipts.keys
+    }
+
+    pub fun borrowReceipt(receiptID: UInt64): &Receipt? {
+      if self.receipts[receiptID] != nil {
+        return &self.receipts[receiptID] as! &Receipt
+      }
+
+      return nil
+    }
+
+    // Check if the collection has a receipt for a given productID
+    pub fun hasBoughtProduct(productID: UInt32): Bool {
+      var i = 0
+
+      for receiptID in self.getIds() {
+        if self.receipts[receiptID]?.product?.productID == productID {
+          return true
+        }
+      }
+
+      return false
     }
 
     init () {
-      self.receipts <- []
+      self.receipts <- {}
     }
 
     destroy() {
@@ -75,21 +158,27 @@ pub contract ChainmonstersProducts {
     }
   }
 
+  // A receipt references the product and the timestamp when it was purchased
   pub resource Receipt {
-    pub var product: Product
+    pub let product: Product
+    pub let purchasedAt: UFix64
 
     init(product: Product) {
       self.product = product
+      self.purchasedAt = getCurrentBlock().timestamp
     }
   }
 
+  // Whoever owns an admin resource can create new products, set a product enabled/disabled and create new admin resources
   pub resource Admin {
-    pub fun createNewProduct(price: UFix64, saleEnabled: Bool, totalSupply: UInt32?, saleEndTime: UFix64?) {
+    pub fun createNewProduct(priceCuts: [PriceCut], paymentVaultType: Type, saleEnabled: Bool, totalSupply: UInt32?, saleEndTime: UFix64?, metadata: String?) {
       var product = Product(
-        price: price, 
+        priceCuts: priceCuts, 
+        paymentVaultType: paymentVaultType,
         saleEnabled: saleEnabled, 
         totalSupply: totalSupply, 
-        saleEndTime: saleEndTime
+        saleEndTime: saleEndTime,
+        metadata: metadata
       )
       
       ChainmonstersProducts.products[product.productID] = product
@@ -97,6 +186,11 @@ pub contract ChainmonstersProducts {
 
     pub fun setProductSaleEnabled(productID: UInt32, saleEnabled: Bool) {
       var product = ChainmonstersProducts.products[productID] ?? panic("Product not found")
+
+      if product.saleEnabled == saleEnabled {
+        // Do nothing if the sale is already in the given state
+        return
+      }
 
       product.setSaleEnabled(saleEnabled: saleEnabled)
 
@@ -111,35 +205,63 @@ pub contract ChainmonstersProducts {
     }
   }
 
+  /**
+   * Contract-level functions
+   */
+  
+  // Create a new empty receipt collection for a purchaser
+  pub fun createReceiptCollection(): @ReceiptCollection {
+    return <-create ReceiptCollection()
+  }
+
+  // Get a single product by id
   pub fun getProduct(productID: UInt32): Product? {
     return self.products[productID]
   }
 
-  // Contract Level Functions
+  // Purchase a product if it is available
   pub fun purchase(
     productID: UInt32,
     buyerReceiptCollection: &ReceiptCollection,
-    buyerPayment: @FungibleToken.Vault
+    paymentVault: @FungibleToken.Vault
   ) {
     pre {
-      self.products[productID] != nil: 
+      self.getProduct(productID: productID) != nil: 
         "Product not found"
-      self.products[productID]!.saleEnabled: 
+      self.getProduct(productID: productID)!.saleEnabled: 
         "Product sale is not enabled"
-      self.products[productID]!.totalSupply != nil && self.salesPerProduct[productID] != nil && self.salesPerProduct[productID]! <= self.products[productID]!.totalSupply!: 
+      self.getProduct(productID: productID)!.totalSupply == nil || 
+      self.getProduct(productID: productID)!.getSales() < self.getProduct(productID: productID)!.totalSupply!: 
         "Product out of stock"
-      self.products[productID]!.saleEndTime == nil || getCurrentBlock().timestamp < self.products[productID]!.saleEndTime!: 
+      self.getProduct(productID: productID)!.saleEndTime == nil || 
+      getCurrentBlock().timestamp < self.getProduct(productID: productID)!.saleEndTime!: 
         "Product sale has ended"
-      buyerPayment.balance == self.products[productID]!.price:
+      paymentVault.isInstance(self.getProduct(productID: productID)!.paymentVaultType)
+      paymentVault.balance == self.products[productID]!.price:
         "Payment does not equal product price"
-      self.paymentReceiverCapability.borrow() != nil:
-        "Could not borrow payment receiver"
     }
 
-    let product = ChainmonstersProducts.products[productID]!
+    let product = self.getProduct(productID: productID)!
 
-    // Transfer the payment from buyer to payment receiver
-    self.paymentReceiverCapability.borrow()!.deposit(from: <- buyerPayment)
+    // We set a fallback payment receiver in case not all price cut receivers are available.
+    // The first valid price cut receiver will be elected to receive all the rest funds.
+    var fallbackPaymentReceiver: &{FungibleToken.Receiver}? = nil
+
+    for cut in product.priceCuts {
+      if let paymentReceiver = cut.receiver.borrow() {
+        let paymentCut <- paymentVault.withdraw(amount: cut.amount)
+        paymentReceiver.deposit(from: <-paymentCut)
+        if (fallbackPaymentReceiver == nil) {
+          fallbackPaymentReceiver = paymentReceiver
+        }
+      }
+    }
+
+    // Panic if there are no valid payment receivers at all
+    assert(fallbackPaymentReceiver != nil, message: "No valid payment receivers")
+
+    // Fallback payment receiver gets all the rest funds
+    fallbackPaymentReceiver!.deposit(from: <- paymentVault)
 
     // Save receipt to the buyer's collection
     buyerReceiptCollection.saveReceipt(receipt: <- create Receipt(product: product))
@@ -147,7 +269,8 @@ pub contract ChainmonstersProducts {
     // Increment sales counter for this product
     self.salesPerProduct[productID] = self.salesPerProduct[productID]! + 1
 
-    emit ProductPurchased(product: product, buyer: buyerReceiptCollection.owner?.address)
+    // Emit purchase event
+    emit ProductPurchased(productID: product.productID, buyer: buyerReceiptCollection.owner?.address)
   }
 
   init() {
@@ -157,8 +280,6 @@ pub contract ChainmonstersProducts {
     self.products = {}
     self.salesPerProduct = {}
     self.nextProductID = 1
-    
-    self.paymentReceiverCapability = self.account.getCapability<&FUSD.Vault{FungibleToken.Receiver}>(/public/fusdReceiver)
 
     self.account.save<@Admin>(<- create Admin(), to: /storage/chainmonstersProductsAdmin)
 
