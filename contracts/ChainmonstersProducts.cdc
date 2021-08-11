@@ -18,7 +18,7 @@ pub contract ChainmonstersProducts {
     metadata: String?
   )
   pub event ProductSaleChanged(productID: UInt32, saleEnabled: Bool)
-  pub event ProductPurchased(productID: UInt32, buyer: Address?)
+  pub event ProductPurchased(productID: UInt32, receiptID: UInt64, buyer: Address?)
 
   /**
    * Contract-level fields
@@ -263,14 +263,20 @@ pub contract ChainmonstersProducts {
     // Fallback payment receiver gets all the rest funds
     fallbackPaymentReceiver!.deposit(from: <- paymentVault)
 
+    // Create a new receipt resource
+    let receipt <- create Receipt(product: product)
+
+    // Get the receipt ID for the purchase event
+    let receiptID = receipt.uuid
+
     // Save receipt to the buyer's collection
-    buyerReceiptCollection.saveReceipt(receipt: <- create Receipt(product: product))
+    buyerReceiptCollection.saveReceipt(receipt: <- receipt)
 
     // Increment sales counter for this product
     self.salesPerProduct[productID] = self.salesPerProduct[productID]! + 1
 
     // Emit purchase event
-    emit ProductPurchased(productID: product.productID, buyer: buyerReceiptCollection.owner?.address)
+    emit ProductPurchased(productID: product.productID, receiptID: receiptID, buyer: buyerReceiptCollection.owner?.address)
   }
 
   init() {

@@ -99,7 +99,11 @@ describe("ChainmonstersProducts", () => {
     );
 
     expect(purchaseEvent).toBeDefined();
-    expect(purchaseEvent.data).toEqual({ productID: 1, buyer: Cecilia });
+    expect(purchaseEvent.data).toEqual({
+      productID: 1,
+      receiptID: 37, // uuid should be deterministic but might change if more transactions are introduced in the test
+      buyer: Cecilia,
+    });
 
     expect(await getFUSDBalance(Alice)).toEqual("100.00000000");
     expect(await getFUSDBalance(Bob)).toEqual("10.00000000");
