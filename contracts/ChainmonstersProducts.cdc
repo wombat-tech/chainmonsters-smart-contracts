@@ -101,7 +101,7 @@ pub contract ChainmonstersProducts {
 
   // A price cut represents a cut of the full product price.
   pub struct PriceCut {
-    pub let receiver: Capability<&{FungibleToken.Receiver}>
+    access(contract) let receiver: Capability<&{FungibleToken.Receiver}>
     pub let amount: UFix64
 
     init(receiver: Capability<&{FungibleToken.Receiver}>, amount: UFix64) {
@@ -236,7 +236,8 @@ pub contract ChainmonstersProducts {
       self.getProduct(productID: productID)!.saleEndTime == nil || 
       getCurrentBlock().timestamp < self.getProduct(productID: productID)!.saleEndTime!: 
         "Product sale has ended"
-      paymentVault.isInstance(self.getProduct(productID: productID)!.paymentVaultType)
+      paymentVault.isInstance(self.getProduct(productID: productID)!.paymentVaultType): 
+        "Payment vault is of wrong type"
       paymentVault.balance == self.products[productID]!.price:
         "Payment does not equal product price"
     }
@@ -249,8 +250,7 @@ pub contract ChainmonstersProducts {
 
     for cut in product.priceCuts {
       if let paymentReceiver = cut.receiver.borrow() {
-        let paymentCut <- paymentVault.withdraw(amount: cut.amount)
-        paymentReceiver.deposit(from: <-paymentCut)
+        paymentReceiver.deposit(from: <- paymentVault.withdraw(amount: cut.amount))
         if (fallbackPaymentReceiver == nil) {
           fallbackPaymentReceiver = paymentReceiver
         }
