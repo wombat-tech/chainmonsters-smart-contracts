@@ -52,7 +52,11 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         // The metadata for the rewards is restricted to the name since
         // all other data is inside the token itself already
         // visual stuff and descriptions need to be retrieved via API
-        pub let metadata: String
+        pub var metadata: String
+
+        access(contract) fun setMetadata(metadata: String) {
+            self.metadata = metadata
+        }
 
         init(metadata: String) {
             pre {
@@ -260,6 +264,10 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             return newID
         }
 
+        // Updates the metadata string for an existing reward
+        pub fun updateRewardMetadata(rewardID: UInt32, metadata: String) {
+            ChainmonstersRewards.rewardDatas[rewardID]?.setMetadata(metadata: metadata)
+        }
 
 		// mintReward mints a new NFT-Reward with a new ID
 		// 
