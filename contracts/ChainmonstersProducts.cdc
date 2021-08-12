@@ -9,11 +9,11 @@ pub contract ChainmonstersProducts {
 
   pub event ContractInitialized()
   pub event ProductCreated(
-    productID: UInt32, 
-    price: UFix64, 
-    paymentVaultType: Type, 
-    saleEnabled: Bool, 
-    totalSupply: UInt32?, 
+    productID: UInt32,
+    price: UFix64,
+    paymentVaultType: Type,
+    saleEnabled: Bool,
+    totalSupply: UInt32?,
     saleEndTime: UFix64?,
     metadata: String?
   )
@@ -109,7 +109,7 @@ pub contract ChainmonstersProducts {
       self.amount = amount
     }
   }
-  
+
   /**
    * Resources
    */
@@ -173,14 +173,14 @@ pub contract ChainmonstersProducts {
   pub resource Admin {
     pub fun createNewProduct(priceCuts: [PriceCut], paymentVaultType: Type, saleEnabled: Bool, totalSupply: UInt32?, saleEndTime: UFix64?, metadata: String?) {
       var product = Product(
-        priceCuts: priceCuts, 
+        priceCuts: priceCuts,
         paymentVaultType: paymentVaultType,
-        saleEnabled: saleEnabled, 
-        totalSupply: totalSupply, 
+        saleEnabled: saleEnabled,
+        totalSupply: totalSupply,
         saleEndTime: saleEndTime,
         metadata: metadata
       )
-      
+
       ChainmonstersProducts.products[product.productID] = product
     }
 
@@ -208,7 +208,7 @@ pub contract ChainmonstersProducts {
   /**
    * Contract-level functions
    */
-  
+
   // Create a new empty receipt collection for a purchaser
   pub fun createReceiptCollection(): @ReceiptCollection {
     return <-create ReceiptCollection()
@@ -226,17 +226,17 @@ pub contract ChainmonstersProducts {
     paymentVault: @FungibleToken.Vault
   ) {
     pre {
-      self.getProduct(productID: productID) != nil: 
+      self.getProduct(productID: productID) != nil:
         "Product not found"
-      self.getProduct(productID: productID)!.saleEnabled: 
+      self.getProduct(productID: productID)!.saleEnabled:
         "Product sale is not enabled"
-      self.getProduct(productID: productID)!.totalSupply == nil || 
-      self.getProduct(productID: productID)!.getSales() < self.getProduct(productID: productID)!.totalSupply!: 
+      self.getProduct(productID: productID)!.totalSupply == nil ||
+      self.getProduct(productID: productID)!.getSales() < self.getProduct(productID: productID)!.totalSupply!:
         "Product out of stock"
-      self.getProduct(productID: productID)!.saleEndTime == nil || 
-      getCurrentBlock().timestamp < self.getProduct(productID: productID)!.saleEndTime!: 
+      self.getProduct(productID: productID)!.saleEndTime == nil ||
+      getCurrentBlock().timestamp < self.getProduct(productID: productID)!.saleEndTime!:
         "Product sale has ended"
-      paymentVault.isInstance(self.getProduct(productID: productID)!.paymentVaultType): 
+      paymentVault.isInstance(self.getProduct(productID: productID)!.paymentVaultType):
         "Payment vault is of wrong type"
       paymentVault.balance == self.products[productID]!.price:
         "Payment does not equal product price"
