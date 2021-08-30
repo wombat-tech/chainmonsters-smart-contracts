@@ -50,7 +50,12 @@
         "mainnet": "64f83c60989ce555"
       }
     },
-    "ChainmonstersProducts": "./contracts/ChainmonstersProducts.cdc"
+    "ChainmonstersProducts": {
+      "source": "./contracts/ChainmonstersProducts.cdc",
+      "aliases": {
+        "mainnet": "ec93a9a9ab336096"
+      }
+    }
   },
   "deployments": {
     "emulator": {
@@ -63,7 +68,11 @@
       ]
     },
     "testnet": {
-      "testnet-deployer": ["ChainmonstersRewards", "ChainmonstersMarketplace"]
+      "testnet-deployer": [
+        "ChainmonstersRewards",
+        "ChainmonstersMarketplace",
+        "ChainmonstersProducts"
+      ]
     }
   },
   "accounts": {
