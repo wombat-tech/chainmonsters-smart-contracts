@@ -199,6 +199,66 @@ pub contract ChainmonstersProducts {
       emit ProductSaleChanged(productID: productID, saleEnabled: saleEnabled)
     }
 
+    // Purchase a product if it is available
+    pub fun purchase(
+      productID: UInt32,
+      buyerReceiptCollection: &ReceiptCollection,
+      paymentVault: @FungibleToken.Vault
+    ) {
+      pre {
+        ChainmonstersProducts.getProduct(productID: productID) != nil:
+          "Product not found"
+        ChainmonstersProducts.getProduct(productID: productID)!.saleEnabled:
+          "Product sale is not enabled"
+        ChainmonstersProducts.getProduct(productID: productID)!.totalSupply == nil ||
+        ChainmonstersProducts.getProduct(productID: productID)!.getSales() < ChainmonstersProducts.getProduct(productID: productID)!.totalSupply!:
+          "Product out of stock"
+        ChainmonstersProducts.getProduct(productID: productID)!.saleEndTime == nil ||
+        getCurrentBlock().timestamp < ChainmonstersProducts.getProduct(productID: productID)!.saleEndTime!:
+          "Product sale has ended"
+        paymentVault.isInstance(ChainmonstersProducts.getProduct(productID: productID)!.paymentVaultType):
+          "Payment vault is of wrong type"
+        paymentVault.balance == ChainmonstersProducts.products[productID]!.price:
+          "Payment does not equal product price"
+      }
+
+      let product = ChainmonstersProducts.getProduct(productID: productID)!
+
+      // We set a fallback payment receiver in case not all price cut receivers are available.
+      // The first valid price cut receiver will be elected to receive all the rest funds.
+      var fallbackPaymentReceiver: &{FungibleToken.Receiver}? = nil
+
+      for cut in product.priceCuts {
+        if let paymentReceiver = cut.receiver.borrow() {
+          paymentReceiver.deposit(from: <- paymentVault.withdraw(amount: cut.amount))
+          if (fallbackPaymentReceiver == nil) {
+            fallbackPaymentReceiver = paymentReceiver
+          }
+        }
+      }
+
+      // Panic if there are no valid payment receivers at all
+      assert(fallbackPaymentReceiver != nil, message: "No valid payment receivers")
+
+      // Fallback payment receiver gets all the rest funds
+      fallbackPaymentReceiver!.deposit(from: <- paymentVault)
+
+      // Create a new receipt resource
+      let receipt <- create Receipt(product: product)
+
+      // Get the receipt ID for the purchase event
+      let receiptID = receipt.uuid
+
+      // Save receipt to the buyer's collection
+      buyerReceiptCollection.saveReceipt(receipt: <- receipt)
+
+      // Increment sales counter for this product
+      ChainmonstersProducts.salesPerProduct[productID] = ChainmonstersProducts.salesPerProduct[productID]! + 1
+
+      // Emit purchase event
+      emit ProductPurchased(productID: product.productID, receiptID: receiptID, buyer: buyerReceiptCollection.owner?.address)
+    }
+
     // createNewAdmin creates a new Admin resource
     pub fun createNewAdmin(): @Admin {
         return <-create Admin()
@@ -217,66 +277,6 @@ pub contract ChainmonstersProducts {
   // Get a single product by id
   pub fun getProduct(productID: UInt32): Product? {
     return self.products[productID]
-  }
-
-  // Purchase a product if it is available
-  pub fun purchase(
-    productID: UInt32,
-    buyerReceiptCollection: &ReceiptCollection,
-    paymentVault: @FungibleToken.Vault
-  ) {
-    pre {
-      self.getProduct(productID: productID) != nil:
-        "Product not found"
-      self.getProduct(productID: productID)!.saleEnabled:
-        "Product sale is not enabled"
-      self.getProduct(productID: productID)!.totalSupply == nil ||
-      self.getProduct(productID: productID)!.getSales() < self.getProduct(productID: productID)!.totalSupply!:
-        "Product out of stock"
-      self.getProduct(productID: productID)!.saleEndTime == nil ||
-      getCurrentBlock().timestamp < self.getProduct(productID: productID)!.saleEndTime!:
-        "Product sale has ended"
-      paymentVault.isInstance(self.getProduct(productID: productID)!.paymentVaultType):
-        "Payment vault is of wrong type"
-      paymentVault.balance == self.products[productID]!.price:
-        "Payment does not equal product price"
-    }
-
-    let product = self.getProduct(productID: productID)!
-
-    // We set a fallback payment receiver in case not all price cut receivers are available.
-    // The first valid price cut receiver will be elected to receive all the rest funds.
-    var fallbackPaymentReceiver: &{FungibleToken.Receiver}? = nil
-
-    for cut in product.priceCuts {
-      if let paymentReceiver = cut.receiver.borrow() {
-        paymentReceiver.deposit(from: <- paymentVault.withdraw(amount: cut.amount))
-        if (fallbackPaymentReceiver == nil) {
-          fallbackPaymentReceiver = paymentReceiver
-        }
-      }
-    }
-
-    // Panic if there are no valid payment receivers at all
-    assert(fallbackPaymentReceiver != nil, message: "No valid payment receivers")
-
-    // Fallback payment receiver gets all the rest funds
-    fallbackPaymentReceiver!.deposit(from: <- paymentVault)
-
-    // Create a new receipt resource
-    let receipt <- create Receipt(product: product)
-
-    // Get the receipt ID for the purchase event
-    let receiptID = receipt.uuid
-
-    // Save receipt to the buyer's collection
-    buyerReceiptCollection.saveReceipt(receipt: <- receipt)
-
-    // Increment sales counter for this product
-    self.salesPerProduct[productID] = self.salesPerProduct[productID]! + 1
-
-    // Emit purchase event
-    emit ProductPurchased(productID: product.productID, receiptID: receiptID, buyer: buyerReceiptCollection.owner?.address)
   }
 
   init() {

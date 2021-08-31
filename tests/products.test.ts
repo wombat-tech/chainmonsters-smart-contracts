@@ -401,7 +401,7 @@ describe("ChainmonstersProducts", () => {
           name: "products/__tests__/purchase_product_with_flow.test",
         }),
         args: [[1, UInt32]],
-        signers: [Cecilia],
+        signers: [Cecilia, admin],
       })
     );
   });
@@ -517,13 +517,16 @@ async function getProduct(id: number): Promise<{
   });
 }
 
-async function purchaseProduct(account: any, id: number) {
+async function purchaseProduct(account: any, id: number, admin?: string) {
+  const productsAdmin =
+    admin ?? (await getContractAddress("ChainmonstersProducts"));
+
   return sendTransaction({
     code: await getTransactionCode({
       name: "products/purchase_product",
     }),
     args: [[id, UInt32]],
-    signers: [account],
+    signers: [account, productsAdmin],
   });
 }
 
