@@ -5,8 +5,9 @@ import FUSD from "../../../contracts/lib/FUSD.cdc"
 transaction(productID: UInt32, amount: UFix64) {
   let buyerReceiptCollection: &ChainmonstersProducts.ReceiptCollection
   let mainPayerVault: &FUSD.Vault
+  let admin: &ChainmonstersProducts.Admin
 
-  prepare(acct: AuthAccount) {
+  prepare(acct: AuthAccount, adminAcct: AuthAccount) {
     // First, check to see if a receipts collection exists
     if acct.borrow<&ChainmonstersProducts.ReceiptCollection>(from: ChainmonstersProducts.CollectionStoragePath) == nil {
       // create a new collection
@@ -21,13 +22,15 @@ transaction(productID: UInt32, amount: UFix64) {
 
     self.buyerReceiptCollection = acct.borrow<&ChainmonstersProducts.ReceiptCollection>(from: ChainmonstersProducts.CollectionStoragePath)!
     self.mainPayerVault = acct.borrow<&FUSD.Vault>(from: /storage/fusdVault) ?? panic("Could not borrow FUSD vault");
+    self.admin = adminAcct.borrow<&ChainmonstersProducts.Admin>(from: /storage/chainmonstersProductsAdmin)
+      ?? panic("Could not borrow a reference to the Admin resource")
   } 
 
   execute {
     // A payment vault with any amount
     let paymentVault <- self.mainPayerVault.withdraw(amount: amount)
 
-    ChainmonstersProducts.purchase(
+    self.admin.purchase(
       productID: productID, 
       buyerReceiptCollection: self.buyerReceiptCollection, 
       paymentVault: <- paymentVault
