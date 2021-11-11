@@ -16,7 +16,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     pub event NFTMinted(NFTID: UInt64, rewardID: UInt32, serialNumber: UInt32)
     pub event NewSeasonStarted(newCurrentSeason: UInt32)
 
-    pub event ItemConsumed(itemID: UInt64, playerId: String, playerAddress: Address)
+    pub event ItemConsumed(itemID: UInt64, playerId: String)
 
     pub var nextRewardID: UInt32
 
@@ -271,7 +271,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             // add the new token to the dictionary which removes the old one
             let oldToken <- self.ownedNFTs[id] <- token
 
-            emit ItemConsumed(itemId: id, playerId: playerId, playerAddress: self.owner.address)
+            emit ItemConsumed(itemId: id, playerId: playerId)
 
             destroy oldToken
         }
