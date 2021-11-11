@@ -268,7 +268,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
             let id: UInt64 = token.id
 
-            emit ItemConsumed(itemId: id, playerId: playerId)
+            emit ItemConsumed(itemID: id, playerId: playerId)
 
             destroy token
         }
