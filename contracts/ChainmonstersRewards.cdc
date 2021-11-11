@@ -16,6 +16,8 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     pub event NFTMinted(NFTID: UInt64, rewardID: UInt32, serialNumber: UInt32)
     pub event NewSeasonStarted(newCurrentSeason: UInt32)
 
+    pub event ItemConsumed(itemID: UInt64, playerId: String)
+
     pub var nextRewardID: UInt32
 
     // Variable size dictionary of Reward structs
@@ -258,6 +260,17 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             ChainmonstersRewards.rewardDatas[newID] = newReward
 
             return newID
+        }
+        
+        // consuming an NFT (item) to be converted to in-game economy
+        pub fun consumeItem(token: @NonFungibleToken.NFT, playerId: String) {
+            let token <- token as! @ChainmonstersRewards.NFT
+
+            let id: UInt64 = token.id
+
+            emit ItemConsumed(itemId: id, playerId: playerId)
+
+            destroy token
         }
 
 
