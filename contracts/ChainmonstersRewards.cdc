@@ -268,12 +268,9 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
             let id: UInt64 = token.id
 
-            // add the new token to the dictionary which removes the old one
-            let oldToken <- self.ownedNFTs[id] <- token
-
             emit ItemConsumed(itemId: id, playerId: playerId)
 
-            destroy oldToken
+            destroy token
         }
 
 
