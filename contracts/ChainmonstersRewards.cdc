@@ -279,30 +279,8 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         // uid - unique identifier from system
         pub fun claimItem(rewardID: UInt32, playerId: String, uid: String): @NFT {
 
-             pre {
-
-                // check if the reward is still in "season"
-                ChainmonstersRewards.rewardSeasons[rewardID] == ChainmonstersRewards.currentSeason
-                // check if total supply allows additional NFTs || ignore if there is no hard cap specified == 0
-                ChainmonstersRewards.numberMintedPerReward[rewardID] != ChainmonstersRewards.rewardSupplies[rewardID] || ChainmonstersRewards.rewardSupplies[rewardID] == UInt32(0)
-
-            }
-
-            // Gets the number of NFTs that have been minted for this Reward
-            // to use as this NFT's serial number
-            let numInReward = ChainmonstersRewards.numberMintedPerReward[rewardID]!
-
-            // Mint the new NFT
-            let newReward: @NFT <- create NFT(serialNumber: numInReward + UInt32(1),
-                                              rewardID: rewardID)
-
-            // Increment the count of NFTs minted for this Reward
-            ChainmonstersRewards.numberMintedPerReward[rewardID] = numInReward + UInt32(1)
-
-            
-            let token <- newReward as! @ChainmonstersRewards.NFT
-
-            let id: UInt64 = token.id
+            let nft <- self.mintReward(rewardId: rewardId)
+            let id = nft.id;
 
             emit ItemClaimed(rewardID: id, playerId: playerId, uid: uid)
 
