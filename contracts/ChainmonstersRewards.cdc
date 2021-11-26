@@ -278,13 +278,11 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         // rewardID - reward to be claimed
         // uid - unique identifier from system
         pub fun claimItem(rewardID: UInt32, playerId: String, uid: String): @NFT {
+            let nft <- self.mintReward(rewardID: rewardID)
 
-            let nft <- self.mintReward(rewardId: rewardId)
-            let id = nft.id;
+            emit ItemClaimed(itemID: nft.id, playerId: playerId, uid: uid)
 
-            emit ItemClaimed(rewardID: id, playerId: playerId, uid: uid)
-
-            return <-newReward
+            return <- nft
         }
 
 
