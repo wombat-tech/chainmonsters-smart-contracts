@@ -17,6 +17,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     pub event NewSeasonStarted(newCurrentSeason: UInt32)
 
     pub event ItemConsumed(itemID: UInt64, playerId: String)
+    pub event ItemClaimed(itemID: UInt64, playerId: String, uid: String)
 
     pub var nextRewardID: UInt32
 
@@ -271,6 +272,17 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             emit ItemConsumed(itemID: id, playerId: playerId)
 
             destroy token
+        }
+
+        // claiming an NFT item from e.g. Season Pass or Store
+        // rewardID - reward to be claimed
+        // uid - unique identifier from system
+        pub fun claimItem(rewardID: UInt32, playerId: String, uid: String): @NFT {
+            let nft <- self.mintReward(rewardID: rewardID)
+
+            emit ItemClaimed(itemID: nft.id, playerId: playerId, uid: uid)
+
+            return <- nft
         }
 
 
