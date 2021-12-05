@@ -19,6 +19,7 @@ pub contract ChainmonstersProducts {
   )
   pub event ProductSaleChanged(productID: UInt32, saleEnabled: Bool)
   pub event ProductPurchased(productID: UInt32, receiptID: UInt64, buyer: Address?)
+  pub event ProductPurchasedByPlayer(productID: UInt32, receiptID: UInt64, buyer: Address?, playerID: String)
 
   /**
    * Contract-level fields
@@ -203,7 +204,8 @@ pub contract ChainmonstersProducts {
     pub fun purchase(
       productID: UInt32,
       buyerReceiptCollection: &ReceiptCollection,
-      paymentVault: @FungibleToken.Vault
+      paymentVault: @FungibleToken.Vault,
+      playerID: String
     ) {
       pre {
         ChainmonstersProducts.getProduct(productID: productID) != nil:
@@ -256,7 +258,7 @@ pub contract ChainmonstersProducts {
       ChainmonstersProducts.salesPerProduct[productID] = ChainmonstersProducts.salesPerProduct[productID]! + 1
 
       // Emit purchase event
-      emit ProductPurchased(productID: product.productID, receiptID: receiptID, buyer: buyerReceiptCollection.owner?.address)
+      emit ProductPurchasedByPlayer(productID: product.productID, receiptID: receiptID, buyer: buyerReceiptCollection.owner?.address, playerID: playerID)
     }
 
     // createNewAdmin creates a new Admin resource
