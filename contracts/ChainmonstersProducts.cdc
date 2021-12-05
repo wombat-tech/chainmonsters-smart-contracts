@@ -18,8 +18,7 @@ pub contract ChainmonstersProducts {
     metadata: String?
   )
   pub event ProductSaleChanged(productID: UInt32, saleEnabled: Bool)
-  pub event ProductPurchased(productID: UInt32, receiptID: UInt64, buyer: Address?)
-  pub event ProductPurchasedByPlayer(productID: UInt32, receiptID: UInt64, buyer: Address?, playerID: String)
+  pub event ProductPurchased(productID: UInt32, receiptID: UInt64, buyer: Address?, playerID: String?)
 
   /**
    * Contract-level fields
@@ -258,7 +257,7 @@ pub contract ChainmonstersProducts {
       ChainmonstersProducts.salesPerProduct[productID] = ChainmonstersProducts.salesPerProduct[productID]! + 1
 
       // Emit purchase event
-      emit ProductPurchasedByPlayer(productID: product.productID, receiptID: receiptID, buyer: buyerReceiptCollection.owner?.address, playerID: playerID)
+      emit ProductPurchased(productID: product.productID, receiptID: receiptID, buyer: buyerReceiptCollection.owner?.address, playerID: playerID)
     }
 
     // createNewAdmin creates a new Admin resource
