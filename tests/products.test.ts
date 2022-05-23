@@ -65,10 +65,10 @@ describe("ChainmonstersProducts", () => {
     const event = events[0];
 
     expect(event.type).toMatch(/ChainmonstersProducts\.ProductCreated$/);
-    expect(event.data).toEqual({
+    expect(event.data.paymentVaultType.typeID).toMatch(/FUSD\.Vault$/);
+    expect(event.data).toMatchObject({
       productID: 1,
       price: "110.00000000",
-      paymentVaultType: "A.f8d6e0586b0a20c7.FUSD.Vault",
       saleEnabled: true,
       totalSupply: 1337,
       saleEndTime: UNIX_START_TIME.toFixed(8),
@@ -396,7 +396,7 @@ describe("ChainmonstersProducts", () => {
 
     const [{ paymentVaultType }] = await getProduct(1);
 
-    expect(paymentVaultType).toMatch(/FlowToken\.Vault$/);
+    expect(paymentVaultType.typeID).toMatch(/FlowToken\.Vault$/);
 
     await shallPass(
       sendTransaction({
@@ -512,7 +512,7 @@ async function getProduct(id: number): Promise<
   [
     {
       price: number;
-      paymentVaultType: string;
+      paymentVaultType: Record<any, any>;
       sales: number;
       saleEndTime?: number;
       metadata?: string;
