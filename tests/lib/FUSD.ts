@@ -8,7 +8,9 @@ import {
 } from "flow-js-testing";
 import { getAddressMap, toUFix64 } from "./helpers";
 
-export async function setupFUSDVault(account: any) {
+export async function setupFUSDVault(
+  account: any
+): Promise<[{ events: any[] }]> {
   return sendTransaction({
     code: await getTransactionCode({
       name: "fusd/setup_account",
@@ -17,7 +19,10 @@ export async function setupFUSDVault(account: any) {
   });
 }
 
-export async function mintFUSD(receiver: any, amount: Number) {
+export async function mintFUSD(
+  receiver: any,
+  amount: Number
+): Promise<[{ events: any[] }]> {
   const fusdAdmin = await getContractAddress("FUSD");
   return sendTransaction({
     code: await getTransactionCode({
@@ -32,7 +37,7 @@ export async function mintFUSD(receiver: any, amount: Number) {
   });
 }
 
-export async function getFUSDBalance(account: any) {
+export async function getFUSDBalance(account: any): Promise<[string]> {
   const addressMap = await getAddressMap();
 
   return executeScript({

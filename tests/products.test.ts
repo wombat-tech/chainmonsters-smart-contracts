@@ -101,15 +101,16 @@ describe("ChainmonstersProducts", () => {
     expect(purchaseEvent).toBeDefined();
     expect(purchaseEvent.data).toEqual({
       productID: 1,
-      receiptID: 37, // uuid should be deterministic but might change if more transactions are introduced in the test
+      receiptID: 45, // uuid should be deterministic but might change if more transactions are introduced in the test
       buyer: Cecilia,
+      playerID: "test",
     });
 
-    expect(await getFUSDBalance(Alice)).toEqual("100.00000000");
-    expect(await getFUSDBalance(Bob)).toEqual("10.00000000");
-    expect(await getFUSDBalance(Cecilia)).toEqual("1227.00000000");
+    expect((await getFUSDBalance(Alice))[0]).toEqual("100.00000000");
+    expect((await getFUSDBalance(Bob))[0]).toEqual("10.00000000");
+    expect((await getFUSDBalance(Cecilia))[0]).toEqual("1227.00000000");
 
-    expect(await hasBoughtProduct(Cecilia, 1)).toBeTruthy();
+    expect((await hasBoughtProduct(Cecilia, 1))[0]).toBeTruthy();
 
     const [{ sales }] = await getProduct(1);
 
@@ -299,8 +300,10 @@ describe("ChainmonstersProducts", () => {
     // Transaction should pass, even though Bob's FUSD vault is gone
     await shallPass(purchaseProduct(Cecilia, 1));
 
+    const [balance] = await getFUSDBalance(Alice);
+
     // Alice should have received all 110 FUSD
-    expect(await getFUSDBalance(Alice)).toEqual("110.00000000");
+    expect(balance).toEqual("110.00000000");
   });
 
   test("should fail purchase if all payment receivers are gone", async () => {
@@ -400,7 +403,10 @@ describe("ChainmonstersProducts", () => {
         code: await getTransactionCode({
           name: "products/__tests__/purchase_product_with_flow.test",
         }),
-        args: [["1", UInt32]],
+        args: [
+          ["1", UInt32],
+          ["test", String],
+        ],
         signers: [Cecilia, admin],
       })
     );
@@ -536,7 +542,10 @@ async function purchaseProduct(
     code: await getTransactionCode({
       name: "products/purchase_product",
     }),
-    args: [[id.toString(), UInt32]],
+    args: [
+      [id.toString(), UInt32],
+      ["test", String],
+    ],
     signers: [account, productsAdmin],
   });
 }
@@ -553,6 +562,7 @@ async function purchaseProductWithoutChecks(
     args: [
       [id.toString(), UInt32],
       [toUFix64(amount), UFix64],
+      ["test", String],
     ],
     signers: [account],
   });

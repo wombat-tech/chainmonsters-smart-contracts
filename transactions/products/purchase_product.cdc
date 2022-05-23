@@ -2,7 +2,7 @@ import ChainmonstersProducts from "../../contracts/ChainmonstersProducts.cdc"
 import FUSD from "../../contracts/lib/FUSD.cdc"
 
 // Purchase a product
-transaction(productID: UInt32) {
+transaction(productID: UInt32, playerID: String) {
   let buyerReceiptCollection: &ChainmonstersProducts.ReceiptCollection
   let mainPayerVault: &FUSD.Vault
   let admin: &ChainmonstersProducts.Admin
@@ -33,7 +33,8 @@ transaction(productID: UInt32) {
     self.admin.purchase(
       productID: productID, 
       buyerReceiptCollection: self.buyerReceiptCollection, 
-      paymentVault: <- paymentVault
+      paymentVault: <- paymentVault,
+      playerID: playerID
     )
   }
 }
