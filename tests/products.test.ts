@@ -38,7 +38,7 @@ describe("ChainmonstersProducts", () => {
   });
 
   test("should deploy the contracts", async () => {
-    const { events } = await deployContracts();
+    const [{ events }] = await deployContracts();
 
     const initEvent = events.find((e) =>
       (e.type as string).endsWith("ChainmonstersProducts.ContractInitialized")
@@ -51,7 +51,7 @@ describe("ChainmonstersProducts", () => {
     const { Alice, Bob } = await setupTestUsers();
     const UNIX_START_TIME = Math.round(Date.now() / 1000);
 
-    const { events } = await createProduct({
+    const [{ events }] = await createProduct({
       primaryReceiver: Alice,
       secondaryReceiver: Bob,
       saleEnabled: true,
@@ -75,7 +75,7 @@ describe("ChainmonstersProducts", () => {
       metadata: "Cool product 😎",
     });
 
-    const product = await getProduct(1);
+    const [product] = await getProduct(1);
 
     expect(product).not.toBeNull();
     expect(product.sales).toBe(0);
@@ -92,7 +92,7 @@ describe("ChainmonstersProducts", () => {
       secondaryReceiver: Bob,
     });
 
-    const { events } = await purchaseProduct(Cecilia, 1);
+    const [{ events }] = await purchaseProduct(Cecilia, 1);
 
     const purchaseEvent = events.find((e) =>
       (e.type as string).endsWith("ChainmonstersProducts.ProductPurchased")
@@ -111,7 +111,7 @@ describe("ChainmonstersProducts", () => {
 
     expect(await hasBoughtProduct(Cecilia, 1)).toBeTruthy();
 
-    const { sales } = await getProduct(1);
+    const [{ sales }] = await getProduct(1);
 
     expect(sales).toEqual(1);
   });
@@ -160,7 +160,7 @@ describe("ChainmonstersProducts", () => {
 
     expect(await hasBoughtProduct(Cecilia, 1)).toBeTruthy();
 
-    const { sales } = await getProduct(1);
+    const [{ sales }] = await getProduct(1);
 
     expect(sales).toEqual(1);
   });
@@ -179,7 +179,7 @@ describe("ChainmonstersProducts", () => {
       saleEndTime: END_TIME,
     });
 
-    const { saleEndTime } = await getProduct(1);
+    const [{ saleEndTime }] = await getProduct(1);
 
     expect(saleEndTime).toEqual(END_TIME.toFixed(8));
 
@@ -189,7 +189,7 @@ describe("ChainmonstersProducts", () => {
     // Script read should fail as well
     await shallRevert(hasBoughtProduct(Cecilia, 1));
 
-    const { sales } = await getProduct(1);
+    const [{ sales }] = await getProduct(1);
 
     expect(sales).toEqual(0);
   });
@@ -209,7 +209,7 @@ describe("ChainmonstersProducts", () => {
     await shallRevert(purchaseProduct(Cecilia, 1));
 
     // Enable sale
-    const { events } = await setProductSaleEnabled(1, true);
+    const [{ events }] = await setProductSaleEnabled(1, true);
 
     const changeEvent = events.find((e) =>
       (e.type as string).endsWith("ChainmonstersProducts.ProductSaleChanged")
@@ -222,7 +222,7 @@ describe("ChainmonstersProducts", () => {
     await shallPass(purchaseProduct(Cecilia, 1));
 
     // Disable sale again
-    const { events: events2 } = await setProductSaleEnabled(1, false);
+    const [{ events: events2 }] = await setProductSaleEnabled(1, false);
 
     const changeEvent2 = events2.find((e) =>
       (e.type as string).endsWith("ChainmonstersProducts.ProductSaleChanged")
@@ -234,7 +234,7 @@ describe("ChainmonstersProducts", () => {
     // Should fail
     await shallRevert(purchaseProduct(Cecilia, 1));
 
-    const { sales } = await getProduct(1);
+    const [{ sales }] = await getProduct(1);
 
     expect(sales).toEqual(1);
   });
@@ -264,7 +264,7 @@ describe("ChainmonstersProducts", () => {
       saleEnabled: true,
     });
 
-    const { events } = await setProductSaleEnabled(1, true);
+    const [{ events }] = await setProductSaleEnabled(1, true);
 
     const changeEvent = events.find((e) =>
       (e.type as string).endsWith("ChainmonstersProducts.ProductSaleChanged")
@@ -391,7 +391,7 @@ describe("ChainmonstersProducts", () => {
       signers: [admin],
     });
 
-    const { paymentVaultType } = await getProduct(1);
+    const [{ paymentVaultType }] = await getProduct(1);
 
     expect(paymentVaultType).toMatch(/FlowToken\.Vault$/);
 
@@ -400,7 +400,7 @@ describe("ChainmonstersProducts", () => {
         code: await getTransactionCode({
           name: "products/__tests__/purchase_product_with_flow.test",
         }),
-        args: [[1, UInt32]],
+        args: [["1", UInt32]],
         signers: [Cecilia, admin],
       })
     );
@@ -409,7 +409,7 @@ describe("ChainmonstersProducts", () => {
 
 // -----
 
-async function deployContracts() {
+async function deployContracts(): Promise<[{ events: any[] }]> {
   const to = await getServiceAddress();
   const addressMap = await getAddressMap(to);
 
@@ -464,7 +464,7 @@ async function createProduct({
   saleEndTime?: number;
   metadata?: string;
   signer?: any;
-}): Promise<{ events: any[] }> {
+}): Promise<[{ events: any[] }]> {
   const productsAdmin =
     signer ?? (await getContractAddress("ChainmonstersProducts"));
 
@@ -476,7 +476,7 @@ async function createProduct({
       [primaryReceiver, Address],
       [secondaryReceiver, Address],
       [saleEnabled, Bool], // saleEnabled
-      [totalSupply, Optional(UInt32)], // totalSupply
+      [totalSupply?.toString(), Optional(UInt32)], // totalSupply
       [saleEndTime ? toUFix64(saleEndTime) : null, Optional(UFix64)], // saleEndTime
       [metadata, Optional(String)],
     ],
@@ -484,7 +484,10 @@ async function createProduct({
   });
 }
 
-async function setProductSaleEnabled(id: number, saleEnabled: boolean) {
+async function setProductSaleEnabled(
+  id: number,
+  saleEnabled: boolean
+): Promise<[{ events: any[] }]> {
   const productsAdmin = await getContractAddress("ChainmonstersProducts");
 
   return sendTransaction({
@@ -492,20 +495,24 @@ async function setProductSaleEnabled(id: number, saleEnabled: boolean) {
       name: "products/set_product_sale_enabled",
     }),
     args: [
-      [id, UInt32],
+      [id.toString(), UInt32],
       [saleEnabled, Bool],
     ],
     signers: [productsAdmin],
   });
 }
 
-async function getProduct(id: number): Promise<{
-  price: number;
-  paymentVaultType: string;
-  sales: number;
-  saleEndTime?: number;
-  metadata?: string;
-}> {
+async function getProduct(id: number): Promise<
+  [
+    {
+      price: number;
+      paymentVaultType: string;
+      sales: number;
+      saleEndTime?: number;
+      metadata?: string;
+    }
+  ]
+> {
   const addressMap = await getAddressMap();
 
   return executeScript({
@@ -513,11 +520,15 @@ async function getProduct(id: number): Promise<{
       name: "products/__tests__/get_product.test",
       addressMap,
     }),
-    args: [[id, UInt32]],
+    args: [[id.toString(), UInt32]],
   });
 }
 
-async function purchaseProduct(account: any, id: number, admin?: string) {
+async function purchaseProduct(
+  account: any,
+  id: number,
+  admin?: string
+): Promise<[{ events: any[] }]> {
   const productsAdmin =
     admin ?? (await getContractAddress("ChainmonstersProducts"));
 
@@ -525,7 +536,7 @@ async function purchaseProduct(account: any, id: number, admin?: string) {
     code: await getTransactionCode({
       name: "products/purchase_product",
     }),
-    args: [[id, UInt32]],
+    args: [[id.toString(), UInt32]],
     signers: [account, productsAdmin],
   });
 }
@@ -534,20 +545,20 @@ async function purchaseProductWithoutChecks(
   account: any,
   id: number,
   amount: number
-) {
+): Promise<[{ events: any[] }]> {
   return sendTransaction({
     code: await getTransactionCode({
       name: "products/__tests__/purchase_product_with_wrong_balance.test",
     }),
     args: [
-      [id, UInt32],
+      [id.toString(), UInt32],
       [toUFix64(amount), UFix64],
     ],
     signers: [account],
   });
 }
 
-async function hasBoughtProduct(account: any, id: number) {
+async function hasBoughtProduct(account: any, id: number): Promise<[any]> {
   const addressMap = await getAddressMap();
 
   return executeScript({
@@ -557,7 +568,7 @@ async function hasBoughtProduct(account: any, id: number) {
     }),
     args: [
       [account, Address],
-      [id, UInt32],
+      [id.toString(), UInt32],
     ],
   });
 }

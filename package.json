@@ -1,14 +1,14 @@
 {
   "devDependencies": {
-    "@babel/core": "^7.15.0",
-    "@babel/preset-env": "^7.15.0",
-    "@babel/preset-typescript": "^7.15.0",
-    "@onflow/fcl": "^0.0.76",
-    "@onflow/types": "^0.0.5",
-    "@types/jest": "^27.0.1",
-    "babel-jest": "^27.1.0",
-    "flow-js-testing": "^0.1.13",
-    "jest": "^27.1.0"
+    "@babel/core": "^7.18.0",
+    "@babel/preset-env": "^7.18.0",
+    "@babel/preset-typescript": "^7.17.12",
+    "@onflow/fcl": "^1.0.2",
+    "@onflow/types": "^1.0.1",
+    "@types/jest": "^27.5.1",
+    "babel-jest": "^28.1.0",
+    "flow-js-testing": "^0.2.3-alpha.6",
+    "jest": "^28.1.0"
   },
   "scripts": {
     "test": "jest"
