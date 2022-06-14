@@ -41,18 +41,21 @@
     "ChainmonstersRewards": {
       "source": "./contracts/ChainmonstersRewards.cdc",
       "aliases": {
+        "testnet": "75783e3c937304a8",
         "mainnet": "93615d25d14fa337"
       }
     },
     "ChainmonstersMarketplace": {
       "source": "./contracts/ChainmonstersMarketplace.cdc",
       "aliases": {
+        "testnet": "75783e3c937304a8",
         "mainnet": "64f83c60989ce555"
       }
     },
     "ChainmonstersProducts": {
       "source": "./contracts/ChainmonstersProducts.cdc",
       "aliases": {
+        "testnet": "75783e3c937304a8",
         "mainnet": "ec93a9a9ab336096"
       }
     }
