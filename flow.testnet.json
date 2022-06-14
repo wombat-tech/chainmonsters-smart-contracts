@@ -1,0 +1,18 @@
+{
+  "warning": "DO NOT COMMIT PRIVATE KEYS IN THIS FILE!!!!111111",
+  "deployments": {
+    "testnet": {
+      "testnet-deployer": [
+        "ChainmonstersRewards",
+        "ChainmonstersMarketplace",
+        "ChainmonstersProducts"
+      ]
+    }
+  },
+  "accounts": {
+    "testnet-deployer": {
+      "address": "75783e3c937304a8",
+      "keys": "$TESTNET_DEPLOYER_PRIVATE_KEY"
+    }
+  }
+}

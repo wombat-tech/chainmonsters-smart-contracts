@@ -66,13 +66,6 @@
         "ChainmonstersMarketplace",
         "ChainmonstersProducts"
       ]
-    },
-    "testnet": {
-      "testnet-deployer": [
-        "ChainmonstersRewards",
-        "ChainmonstersMarketplace",
-        "ChainmonstersProducts"
-      ]
     }
   },
   "accounts": {
@@ -87,14 +80,6 @@
     "buyer-account": {
       "address": "179b6b1cb6755e31",
       "keys": "420ee2b00c1446c64950ed4f989d96a3d863e1920d0ec9f4508e01e72dd05aeb"
-    },
-    "testnet-deployer": {
-      "address": "75783e3c937304a8",
-      "keys": "$TESTNET_DEPLOYER_PRIVATE_KEY"
-    },
-    "testnet-user": {
-      "address": "$TESTNET_USER_ADDRESS",
-      "keys": "$TESTNET_USER_PRIVATE_KEY"
     }
   },
   "networks": {
