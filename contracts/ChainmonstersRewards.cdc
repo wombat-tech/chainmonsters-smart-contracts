@@ -209,7 +209,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         // borrowNFT gets a reference to an NFT in the collection
         // so that the caller can read its metadata and call its methods
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
         // borrowMReward returns a borrowed reference to a Reward
@@ -220,8 +220,8 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         // Returns: A reference to the NFT
         pub fun borrowReward(id: UInt64): &ChainmonstersRewards.NFT? {
             if self.ownedNFTs[id] != nil {
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &ChainmonstersRewards.NFT
+                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+                return ref as! &ChainmonstersRewards.NFT?
             } else {
                 return nil
             }
@@ -333,7 +333,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             
             // Get a reference to the Set and return it
             // use `&` to indicate the reference to the object and type
-            return &ChainmonstersRewards.rewardDatas[rewardID] as &Reward
+            return (&ChainmonstersRewards.rewardDatas[rewardID] as &Reward?)!
         }
 
 

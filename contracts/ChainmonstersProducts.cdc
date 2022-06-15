@@ -130,7 +130,7 @@ pub contract ChainmonstersProducts {
 
     pub fun borrowReceipt(receiptID: UInt64): &Receipt? {
       if self.receipts[receiptID] != nil {
-        return &self.receipts[receiptID] as! &Receipt
+        return &self.receipts[receiptID] as &Receipt?
       }
 
       return nil

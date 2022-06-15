@@ -273,7 +273,7 @@ pub contract ChainmonstersMarketplace {
             if self.saleOffers[saleItemID] == nil {
                 return nil
             } else {
-                return &self.saleOffers[saleItemID] as &SaleOffer{SaleOfferPublicView}
+                return &self.saleOffers[saleItemID] as &SaleOffer{SaleOfferPublicView}?
             }
         }
 
