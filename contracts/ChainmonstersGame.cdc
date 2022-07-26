@@ -28,7 +28,7 @@ pub contract ChainmonstersGame {
   // Whoever owns an admin resource can emit game events and create new admin resources
   pub resource Admin {
 
-    pub fun emitGameEvent(eventID: UInt32?, playerID: String?) {
+    pub fun emitGameEvent(eventID: UInt32, playerID: String?) {
       emit GameEvent(eventID: eventID, playerID: playerID)
     }
 
