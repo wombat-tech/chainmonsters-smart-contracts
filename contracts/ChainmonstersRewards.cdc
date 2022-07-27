@@ -3,6 +3,7 @@
 // Does not include that much functionality as the only purpose it to mint and store the Presale NFTs.
 
 import NonFungibleToken from "./lib/NonFungibleToken.cdc"
+import MetadataViews from "./lib/MetadataViews.cdc"
 
 pub contract ChainmonstersRewards: NonFungibleToken {
 
@@ -89,7 +90,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     }
 
 
-    pub resource NFT: NonFungibleToken.INFT {
+    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
         
         // Global unique NFT ID
         pub let id: UInt64
@@ -105,6 +106,34 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             self.data = NFTData(rewardID: rewardID, serialNumber: serialNumber)
 
             emit NFTMinted(NFTID: self.id, rewardID: rewardID, serialNumber: self.data.serialNumber)
+        }
+
+        pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>(),
+                Type<MetadataViews.Edition>()
+            ]
+        }
+
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: ChainmonstersRewards.getRewardMetaData(rewardID: self.data.rewardID)!,
+                        description: "A Chainmonsters Reward",
+                        thumbnail: MetadataViews.HTTPFile(
+                            url: ChainmonstersRewards.getRewardImageURL(rewardID: self.data.rewardID)!,
+                        )
+                    )
+                case Type<MetadataViews.Edition>():
+                    return MetadataViews.Edition(
+                        name: ChainmonstersRewards.getRewardMetaData(rewardID: self.data.rewardID)!,
+                        number: UInt64(self.data.serialNumber),
+                        max: UInt64(ChainmonstersRewards.getNumRewardsMinted(rewardID: self.data.rewardID)!)
+                    )
+            }
+
+            return nil
         }
     }
 
@@ -408,6 +437,26 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         let amount = ChainmonstersRewards.numberMintedPerReward[rewardID]
 
         return amount
+    }
+
+    pub fun getRewardImageURL(rewardID: UInt32): String? {
+        let data = ChainmonstersRewards.rewardDatas[rewardID]
+
+        if data == nil {
+            return nil
+        }
+
+        let url = "https://chainmonsters.com/images/rewards/"
+
+        let SEASON_SLUGS = ["kickstarter", "alpha", "genesis", "flowfest2021", "closedbeta"]
+
+        let seasonSlug = SEASON_SLUGS[data!.season]
+
+        if seasonSlug == nil {
+            return nil
+        }
+
+        return url.concat(SEASON_SLUGS[data!.season]).concat("/").concat(rewardID.toString()).concat(".jpg");
     }
 
 
