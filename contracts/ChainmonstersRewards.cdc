@@ -439,6 +439,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         return amount
     }
 
+    // returns the image url of a reward
     pub fun getRewardImageURL(rewardID: UInt32): String? {
         let data = ChainmonstersRewards.rewardDatas[rewardID]
 
@@ -446,7 +447,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             return nil
         }
 
-        let url = "https://chainmonsters.com/images/rewards/"
+        let baseUrl = "https://chainmonsters.com/images/rewards/"
 
         let SEASON_SLUGS = ["kickstarter", "alpha", "genesis", "flowfest2021", "closedbeta"]
 
@@ -456,7 +457,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             return nil
         }
 
-        return url.concat(SEASON_SLUGS[data!.season]).concat("/").concat(rewardID.toString()).concat(".jpg");
+        return baseUrl.concat(SEASON_SLUGS[data!.season]).concat("/").concat(rewardID.toString()).concat(".png");
     }
 
 
