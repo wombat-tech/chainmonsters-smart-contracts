@@ -5,7 +5,7 @@ import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
 /**
  * This transaction allows to purchase an NFT with the given rewardID for a specific price.
  */
-transaction(rewardID: UInt32, price: UFix64) {
+transaction(merchantAddress: Address, rewardID: UInt32, price: UFix64) {
     let balanceBeforeTransfer: UFix64
     let mainDUCVault: &DapperUtilityCoin.Vault
     let paymentVault: @FungibleToken.Vault
@@ -28,7 +28,7 @@ transaction(rewardID: UInt32, price: UFix64) {
         self.paymentVault <- self.mainDUCVault.withdraw(amount: price)
 
         // Borrow reference to the payment receiver
-        self.sellerPaymentReceiver = getAccount(0x0)
+        self.sellerPaymentReceiver = getAccount(merchantAddress)
             .getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver)
             .borrow()
             ?? panic("Could not borrow reference to DapperUtilityCoin receiver")
