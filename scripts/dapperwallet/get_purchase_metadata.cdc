@@ -16,12 +16,12 @@ pub struct PurchaseData {
     }
 }
 
-pub fun main(rewardID: UInt32, price: UFix64): PurchaseData {
+pub fun main(merchantAddress: Address, rewardID: UInt32, price: UFix64): PurchaseData {
     let name = ChainmonstersRewards.getRewardMetaData(rewardID: rewardID)
     let url = ChainmonstersRewards.getRewardImageURL(rewardID: rewardID)
 
     if name != nil && url != nil {
-        return PurchaseData(id: UInt64(rewardID), name: name, amount: 1.0, description: nil, imageURL: url)
+        return PurchaseData(id: UInt64(rewardID), name: name, amount: 1.0, description: "A Chainmonsters Reward", imageURL: url)
     }
     
     panic("Reward not found")

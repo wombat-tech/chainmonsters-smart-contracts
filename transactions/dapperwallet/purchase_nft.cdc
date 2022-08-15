@@ -15,7 +15,7 @@ transaction(merchantAddress: Address, rewardID: UInt32, price: UFix64) {
     let buyerRewardsCollection: &ChainmonstersRewards.Collection
     var purchasedTokenId: UInt64?
 
-    prepare(dapper: AuthAccount, cmAdmin: AuthAccount, buyer: AuthAccount) {
+    prepare(dapper: AuthAccount, buyer: AuthAccount, cmAdmin: AuthAccount) {
         // Borrow reference to the DapperUtilityCoin vault
         self.mainDUCVault = dapper
             .borrow<&DapperUtilityCoin.Vault>(from: /storage/dapperUtilityCoinVault)
