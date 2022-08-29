@@ -156,7 +156,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     }
 
 
-    pub resource Collection: ChainmonstersRewardCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: ChainmonstersRewardCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an `UInt64` ID field
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -254,6 +254,12 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             } else {
                 return nil
             }
+        }
+
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
+            let rewardNFT = nft as! &ChainmonstersRewards.NFT
+            return rewardNFT
         }
 
         destroy() {
