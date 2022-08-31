@@ -3,6 +3,7 @@
 // Does not include that much functionality as the only purpose it to mint and store the Presale NFTs.
 
 import NonFungibleToken from "./lib/NonFungibleToken.cdc"
+import FungibleToken from "./lib/FungibleToken.cdc"
 import MetadataViews from "./lib/MetadataViews.cdc"
 
 pub contract ChainmonstersRewards: NonFungibleToken {
@@ -111,7 +112,12 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         pub fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
-                Type<MetadataViews.Edition>()
+                Type<MetadataViews.Edition>(),
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.Serial>()
             ]
         }
 
@@ -131,6 +137,52 @@ pub contract ChainmonstersRewards: NonFungibleToken {
                         number: UInt64(self.data.serialNumber),
                         max: UInt64(ChainmonstersRewards.getNumRewardsMinted(rewardID: self.data.rewardID)!)
                     )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "Chainmonsters Rewards",
+                        description: "An NFT metadata description for Chainmonsters collections",
+                        externalURL: MetadataViews.ExternalURL("https://chainmonsters.com"),
+                        squareImage: MetadataViews.Media(
+                            file: MetadataViews.HTTPFile(
+                                url: "https://chainmonsters.com/images/chipleaf.png"
+                            ),
+                            mediaType: "image/png"
+                        ),
+                        bannerImage: MetadataViews.Media(
+                            file: MetadataViews.HTTPFile(
+                                url: "https://chainmonsters.com/images/bg.jpg"
+                            ),
+                            mediaType: "image/jpeg"
+                        ),
+                        socials: {
+                            "twitter": MetadataViews.ExternalURL("https://twitter.com/chainmonsters"),
+                            "discord": MetadataViews.ExternalURL("https://discord.gg/chainmonsters")
+                        }
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL("https://chainmonsters.com/rewards/".concat(self.data.rewardID.toString()))
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: /storage/ChainmonstersRewardCollection,
+                        publicPath: /public/ChainmonstersRewardCollection,
+                        providerPath: /private/ChainmonstersRewardsCollectionProvider,
+                        publicCollection: Type<&ChainmonstersRewards.Collection{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>(),
+                        publicLinkedType: Type<&ChainmonstersRewards.Collection{ChainmonstersRewards.ChainmonstersRewardCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&ChainmonstersRewards.Collection{ChainmonstersRewards.ChainmonstersRewardCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @ChainmonstersRewards.Collection {
+                            return <- (ChainmonstersRewards.createEmptyCollection() as! @ChainmonstersRewards.Collection)
+                        })
+                    )
+                case Type<MetadataViews.Royalties>():
+                    return MetadataViews.Royalties([
+                        MetadataViews.Royalty(
+                            receiver: ChainmonstersRewards.account.getCapability<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath()),
+                            cut: 0.05,
+                            description: "Chainmonsters Platform Cut"
+                        )
+                    ])
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(self.id)
             }
 
             return nil
