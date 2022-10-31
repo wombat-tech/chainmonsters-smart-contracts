@@ -92,7 +92,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
 
     pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
-        
+
         // Global unique NFT ID
         pub let id: UInt64
 
@@ -101,8 +101,8 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         init(serialNumber: UInt32, rewardID: UInt32) {
             // Increment the global NFT IDs
             ChainmonstersRewards.totalSupply = ChainmonstersRewards.totalSupply + UInt64(1)
-            
-            self.id = ChainmonstersRewards.totalSupply 
+
+            self.id = ChainmonstersRewards.totalSupply
 
             self.data = NFTData(rewardID: rewardID, serialNumber: serialNumber)
 
@@ -124,7 +124,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         pub fun resolveView(_ view: Type): AnyStruct? {
             let externalRewardMetadata = ChainmonstersRewards.getExternalRewardMetadata(rewardID: self.data.rewardID)
             let externalSeasonMetadata = ChainmonstersRewards.getExternalSeasonMetadata(seasonID: ChainmonstersRewards.getRewardSeason(rewardID: self.data.rewardID)!)
-            
+
             let name = externalRewardMetadata != nil ? externalRewardMetadata!["name"] ?? "Chainmonsters Reward #".concat(self.data.rewardID.toString()) : "Chainmonsters Reward #".concat(self.data.rewardID.toString())
             let description = externalRewardMetadata != nil ? externalRewardMetadata!["description"] ?? "A Chainmonsters Reward" : "A Chainmonsters Reward"
             let seasonSlug = externalSeasonMetadata != nil ? externalSeasonMetadata!["slug"] ?? "unknown" : "unknown"
@@ -208,7 +208,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
-                (result == nil) || (result?.id == id): 
+                (result == nil) || (result?.id == id):
                     "Cannot borrow Reward reference: The ID of the returned reference is incorrect"
             }
         }
@@ -228,11 +228,11 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
 
             // Remove the nft from the Collection
-            let token <- self.ownedNFTs.remove(key: withdrawID) 
+            let token <- self.ownedNFTs.remove(key: withdrawID)
                 ?? panic("Cannot withdraw: Reward does not exist in the collection")
 
             emit Withdraw(id: token.id, from: self.owner?.address)
-            
+
             // Return the withdrawn token
             return <-token
         }
@@ -248,12 +248,12 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         pub fun batchWithdraw(ids: [UInt64]): @NonFungibleToken.Collection {
             // Create a new empty Collection
             var batchCollection <- create Collection()
-            
+
             // Iterate through the ids and withdraw them from the Collection
             for id in ids {
                 batchCollection.deposit(token: <-self.withdraw(withdrawID: id))
             }
-            
+
             // Return the withdrawn tokens
             return <-batchCollection
         }
@@ -334,7 +334,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     //
 	pub resource Admin {
 
-        
+
         // creates a new Reward struct and stores it in the Rewards dictionary
         // Parameters: metadata: the name of the reward
         pub fun createReward(metadata: String, totalSupply: UInt32): UInt32 {
@@ -356,7 +356,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
             return newID
         }
-        
+
         // consuming an NFT (item) to be converted to in-game economy
         pub fun consumeItem(token: @NonFungibleToken.NFT, playerId: String) {
             let token <- token as! @ChainmonstersRewards.NFT
@@ -381,7 +381,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
 
 		// mintReward mints a new NFT-Reward with a new ID
-		// 
+		//
 		pub fun mintReward(rewardID: UInt32): @NFT {
             pre {
 
@@ -406,8 +406,8 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             return <-newReward
 		}
 
-        // batchMintReward mints an arbitrary quantity of Rewards 
-        // 
+        // batchMintReward mints an arbitrary quantity of Rewards
+        //
         pub fun batchMintReward(rewardID: UInt32, quantity: UInt64): @Collection {
             let newCollection <- create Collection()
 
@@ -424,7 +424,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             pre {
                 ChainmonstersRewards.rewardDatas[rewardID] != nil: "Cannot borrow Reward: The Reward doesn't exist"
             }
-            
+
             // Get a reference to the Set and return it
             // use `&` to indicate the reference to the object and type
             return (&ChainmonstersRewards.rewardDatas[rewardID] as &Reward?)!
@@ -480,9 +480,9 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
      // isRewardLocked returns a boolean that indicates if a Reward
     //                      can no longer be minted.
-    // 
+    //
     // Parameters: rewardID: The id of the Set that is being searched
-    //             
+    //
     //
     // Returns: Boolean indicating if the reward is locked or not
     pub fun isRewardLocked(rewardID: UInt32): Bool? {
@@ -550,6 +550,3 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         emit ContractInitialized()
 	}
 }
-
- 
- 
