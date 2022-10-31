@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Kickstarter",
+    "slug": "kickstarter"
+  },
+  {
+    "name": "Alpha",
+    "slug": "alpha"
+  },
+  {
+    "name": "Genesis",
+    "slug": "genesis"
+  },
+  {
+    "name": "Flow Fest 2021",
+    "slug": "flowfest2021"
+  },
+  {
+    "name": "Closed Beta",
+    "slug": "closedbeta"
+  }
+]

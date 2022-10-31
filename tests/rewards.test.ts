@@ -10,6 +10,7 @@ import {
 } from "flow-js-testing";
 import path from "path";
 import rewardsMetadata from "../data/rewardsMetadata.json";
+import seasonsMetadata from "../data/seasonsMetadata.json";
 
 // We need to set timeout for a higher number, because some transactions might take up some time
 jest.setTimeout(50000);
@@ -49,12 +50,38 @@ describe("ChainmonstersRewards", () => {
         [rewardsMetadata]
       )
     );
+
+    await shallPass(
+      sendTransaction(
+        "rewardsMetadata/setSeasonsMetadata",
+        [signer],
+        [seasonsMetadata]
+      )
+    );
   });
 
   test("can mint reward & show metadata", async () => {
     await deployContracts();
 
     const signer = await getServiceAddress();
+
+    // Set rewards metadata
+    await shallPass(
+      sendTransaction(
+        "rewardsMetadata/setRewardsMetadata",
+        [signer],
+        [rewardsMetadata]
+      )
+    );
+
+    // Set seasons metadata
+    await shallPass(
+      sendTransaction(
+        "rewardsMetadata/setSeasonsMetadata",
+        [signer],
+        [seasonsMetadata]
+      )
+    );
 
     // Set up account
     await shallPass(sendTransaction("rewards/setup_account", [signer]));
@@ -81,8 +108,9 @@ describe("ChainmonstersRewards", () => {
     );
 
     expect(nftData).toEqual({
-      name: "Chainmonsters Reward #1",
-      description: "A Chainmonsters Reward",
+      name: "Chainmon Designer",
+      description:
+        "Help us design a Chainmon. Send us ideas or sketches and work with our team to bring it to life! You also receive the very first one of its kind including all variations in your team! If you don't feel like designing then choose one of our upcoming in-house designs and claim it instead!",
       thumbnail: "https://chainmonsters.com/images/rewards/kickstarter/1.png",
       owner: "0xf8d6e0586b0a20c7",
       type: "A.f8d6e0586b0a20c7.ChainmonstersRewards.NFT",

@@ -122,9 +122,12 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         }
 
         pub fun resolveView(_ view: Type): AnyStruct? {
-            let externalMetadata = ChainmonstersRewards.getExternalRewardMetadata(rewardID: self.data.rewardID)
-            let name = externalMetadata != nil ? externalMetadata!["name"] ?? "Chainmonsters Reward #".concat(self.data.rewardID.toString()) : "Chainmonsters Reward #".concat(self.data.rewardID.toString())
-            let description = externalMetadata != nil ? externalMetadata!["description"] ?? "A Chainmonsters Reward" : "A Chainmonsters Reward"
+            let externalRewardMetadata = ChainmonstersRewards.getExternalRewardMetadata(rewardID: self.data.rewardID)
+            let externalSeasonMetadata = ChainmonstersRewards.getExternalSeasonMetadata(seasonID: ChainmonstersRewards.getRewardSeason(rewardID: self.data.rewardID)!)
+            
+            let name = externalRewardMetadata != nil ? externalRewardMetadata!["name"] ?? "Chainmonsters Reward #".concat(self.data.rewardID.toString()) : "Chainmonsters Reward #".concat(self.data.rewardID.toString())
+            let description = externalRewardMetadata != nil ? externalRewardMetadata!["description"] ?? "A Chainmonsters Reward" : "A Chainmonsters Reward"
+            let seasonSlug = externalSeasonMetadata != nil ? externalSeasonMetadata!["slug"] ?? "unknown" : "unknown"
 
             switch view {
                 case Type<MetadataViews.Display>():
@@ -132,7 +135,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
                         name: name,
                         description: description,
                         thumbnail: MetadataViews.HTTPFile(
-                            url: ChainmonstersRewards.getRewardImageURL(rewardID: self.data.rewardID)!,
+                            url: "https://chainmonsters.com/images/rewards/".concat(seasonSlug).concat("/").concat(self.data.rewardID.toString()).concat(".png")
                         )
                     )
                 case Type<MetadataViews.Edition>():
@@ -501,25 +504,15 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         return amount
     }
 
-    // returns the image url of a reward
-    pub fun getRewardImageURL(rewardID: UInt32): String? {
-        let data = ChainmonstersRewards.rewardDatas[rewardID]
+    // Get reward metadata from the contract owner storage, can be upgraded
+    pub fun getExternalSeasonMetadata(seasonID: UInt32): {String: String}? {
+        let data = self.account.getCapability<&[{ String: String }]>(/public/ChainmonstersSeasonsMetadata).borrow()
 
-        if data == nil {
+        if (data == nil) {
             return nil
         }
 
-        let baseUrl = "https://chainmonsters.com/images/rewards/"
-
-        let SEASON_SLUGS = ["kickstarter", "alpha", "genesis", "flowfest2021", "closedbeta"]
-
-        let seasonSlug = SEASON_SLUGS[data!.season]
-
-        if seasonSlug == nil {
-            return nil
-        }
-
-        return baseUrl.concat(SEASON_SLUGS[data!.season]).concat("/").concat(rewardID.toString()).concat(".png");
+        return data![seasonID]
     }
 
     // Get reward metadata from the contract owner storage, can be upgraded
