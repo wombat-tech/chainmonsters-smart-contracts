@@ -1,0 +1,258 @@
+[
+  {
+    "name": "Not in use",
+    "description": "Not in use"
+  },
+  {
+    "name": "Chainmon Designer",
+    "description": "Help us design a Chainmon. Send us ideas or sketches and work with our team to bring it to life! You also receive the very first one of its kind including all variations in your team! If you don't feel like designing then choose one of our upcoming in-house designs and claim it instead!"
+  },
+  {
+    "name": "N-Corp Overseer",
+    "description": "Become an N-Corp Overseer in the game and take over one of the 8 gyms. You can change their appearance and squad"
+  },
+  {
+    "name": "Special Agent",
+    "description": "You control a special agent NPC in the game which allows you to change their outfit, squad and name"
+  },
+  {
+    "name": "Founder Token",
+    "description": "This token grants the owner a permanent XP boost of 2.5% for both player level, season pass and Chainmons Only one founder token can be active per player It scales with every other XP modifier e.g. event-based XP boosts Places an emblem into your profile that proves to everyone that you are one of our first supporters; Not stackable"
+  },
+  {
+    "name": "Mysterious Ticket",
+    "description": "This ticket grants you access to a mysterious island where only you will be able to catch a super rare legendary Chainmon. This is a time-exclusive opportunity during Alpha/Beta with at least 12 months of exclusive access! This particular Chainmon can only be caught once per account."
+  },
+  {
+    "name": "Founder's Club Statue",
+    "description": "Join the Founder's Club and become immortalized inside the N-Corp Headquarters in-game where all the players can see a statue of your character!"
+  },
+  {
+    "name": "Crystal Skin",
+    "description": "Temporarily apply a super exclusive Crystal Skin to ANY Chainmon! Total supply is strictly limited to 600 and you will never be able to obtain them again."
+  },
+  {
+    "name": "Exclusive Collector's Box",
+    "description": "This Kickstarter exclusive Box is uniquely designed and can be used as a decorative object inside your in-game house."
+  },
+  {
+    "name": "Artbook \"The Art of Chainmonsters\"",
+    "description": "The \"Art of Chainmonsters\" artbook can be used as a decorative object in your in-game house."
+  },
+  {
+    "name": "World Map Poster",
+    "description": "A double-sided poster that can be put on the walls of your in-game house as a decoration."
+  },
+  {
+    "name": "Chipleaf Plushie",
+    "description": "A cute Chipleaf plushie that you can put inside your in-game house for decoration."
+  },
+  {
+    "name": "Sticker Pack",
+    "description": "Decorate your in-game house with some nice stickers and show everyone who a true fan is!"
+  },
+  {
+    "name": "Kickstarter exclusive Outfit",
+    "description": "An exclusive outfit for your character rewarded to those that participated in our Kickstarter campaign."
+  },
+  {
+    "name": "Alpha Access",
+    "description": "Previously used to participate in our Alpha. Can be claimed for Closed Beta Access."
+  },
+  {
+    "name": "Kickstarter Badge",
+    "description": "A honorary badge granted to those that supported us in our Kickstarter campaign. Created by claiming an Alpha Access NFT into a game account."
+  },
+  {
+    "name": "Mystery Berry",
+    "description": "A mysterious berry. Some Chainmons go crazy for it!"
+  },
+  {
+    "name": "Spectacular Pearl",
+    "description": "An extremely shiny pearl that seems to inherit some special energy."
+  },
+  {
+    "name": "Helix Fossil",
+    "description": "An old and mysterious fossil shaped like a Helix. Should be examined at a laboratory..."
+  },
+  {
+    "name": "Sweet Pineapple",
+    "description": "Pineapples are the best kind of apples."
+  },
+  {
+    "name": "Green Candy",
+    "description": "A green candy that can be fed to Chainmons. Grants small experience boost on consumption."
+  },
+  {
+    "name": "Blue Candy",
+    "description": "A blue candy that can be fed to Chainmons. Grants medium experience boost on consumption."
+  },
+  {
+    "name": "Purple Candy",
+    "description": "A purple candy that can be fed to Chainmons. Grants large experience boost on consumption."
+  },
+  {
+    "name": "Muscle Band",
+    "description": "When doing a normal attack, the damage is increased by 1% of the opponent's missing HP."
+  },
+  {
+    "name": "Hard Shell",
+    "description": "Increases defense stat by 10%"
+  },
+  {
+    "name": "Mint Token",
+    "description": "An exclusive token that belongs to the Mint Club. Moustaaaaaache!"
+  },
+  {
+    "name": "Energy Drink",
+    "description": "Can it make you fly? Probably not. It does a pretty good job of keeping you awake though! Prevents the sleeping status effect."
+  },
+  {
+    "name": "Piece of Cake",
+    "description": "Gain an EXP share from battles."
+  },
+  {
+    "name": "Essence of Electro",
+    "description": "Electrostatic energy is flowing inside. Touching it creates a discharge effect."
+  },
+  {
+    "name": "Essence of Dendro",
+    "description": "A beautiful flower is stored inside, emitting blossoms once a year."
+  },
+  {
+    "name": "Essence of Pyro",
+    "description": "A wild flame is caught inside, blazing through the flask, emitting a natural heat."
+  },
+  {
+    "name": "Essence of Hydro",
+    "description": "Gathered from the deepest point in the ocean, this special essence boasts of pure energy."
+  },
+  {
+    "name": "Essence of Anemo",
+    "description": "Small clouds are surrounding this special essence from time to time."
+  },
+  {
+    "name": "Essence of Crystal",
+    "description": "Shimmering light is reflected on the specular surface while small crystals have formed inside"
+  },
+  {
+    "name": "Essence of Geo",
+    "description": "Light is reflected from this rock-solid flask. Crafted by nature deep inside Ancora's crust."
+  },
+  {
+    "name": "Essence of Cryo",
+    "description": "A deep frozen flask containing a surprising fluid, changing it's form from liquid to frozen every few seconds."
+  },
+  {
+    "name": "Master Charge",
+    "description": "Guaranteed to replicate a wild Chainmon on first try!"
+  },
+  {
+    "name": "Alpha Badge",
+    "description": "A honorary badge granted to everyone who played our Alpha version."
+  },
+  {
+    "name": "Amber Chainmon",
+    "description": "A mysterious Amber skin-variation of Svania. Only 1000 ever exist!"
+  },
+  {
+    "name": "N-Corp Jacket",
+    "description": "A stylish and super limited N-Corp jacket. Only worn by the best N-Corp agents out there!"
+  },
+  {
+    "name": "Beanie",
+    "description": "A stylish and super limited Beanie. Pro tip: Hides bad hair days!"
+  },
+  {
+    "name": "Adventure Bundle",
+    "description": "Get started on your adventure! Can be claimed for 10x Replicator charges, 10,000 Coins, 3x Green and 1x Blue Candy! (Non-NFTs!)"
+  },
+  {
+    "name": "Purple Candy",
+    "description": "A purple candy that can be fed to Chainmons. Grants large experience boost on consumption."
+  },
+  {
+    "name": "Pyro Gemstone Fragment",
+    "description": "A shimmering red fragment of a Pyro Gemstone. A valuable upgrade for any Pyro Chainmon!"
+  },
+  {
+    "name": "Dendro Gemstone Fragment",
+    "description": "A shimmering green fragment of a Dendro Gemstone. A valuable upgrade for any Dendro Chainmon!"
+  },
+  {
+    "name": "Closed Beta Access",
+    "description": "This was used to access our previous Closed Beta phase 1 which is now completed."
+  },
+  {
+    "name": "??? Key",
+    "description": "A strange key. Who knows where this might belong to..."
+  },
+  {
+    "name": "Worsteel Tee",
+    "description": "Everyone loves Worsteel! Show your fandom with this stylish tshirt!"
+  },
+  {
+    "name": "Master Charge",
+    "description": "Guaranteed to replicate a wild Chainmon on first try!"
+  },
+  {
+    "name": "Essence of Dendro",
+    "description": "A beautiful flower is stored inside, emitting blossoms once a year."
+  },
+  {
+    "name": "Essence of Electro",
+    "description": "Electrostatic energy is flowing inside. Touching it creates a discharge effect."
+  },
+  {
+    "name": "Essence of Pyro",
+    "description": "A wild flame is caught inside, blazing through the flask, emitting a natural heat."
+  },
+  {
+    "name": "Essence of Hydro",
+    "description": "Gathered from the deepest point in the ocean, this special essence boasts of pure energy."
+  },
+  {
+    "name": "Essence of Geo",
+    "description": "Light is reflected from this rock-solid flask. Crafted by nature deep inside Ancora's crust."
+  },
+  {
+    "name": "Essence of Anemo",
+    "description": "Small clouds are surrounding this special essence from time to time."
+  },
+  {
+    "name": "Mint Token",
+    "description": "An exclusive token that belongs to the Mint Club. Moustaaaaaache!"
+  },
+  {
+    "name": "Sunglasses",
+    "description": "Everyone needs a pair of sunglasses when exploring Ancora!"
+  },
+  {
+    "name": "Purple Candy",
+    "description": "A purple candy that can be fed to Chainmons. Grants large experience boost on consumption."
+  },
+  {
+    "name": "Pose 'Gotcha'",
+    "description": "An exclusive pose for your character that you can use as a taunt in battle!"
+  },
+  {
+    "name": "Sugar Cubes",
+    "description": "Some sugary cubes. When held in battle, your Chainmon restores a few HP after it survives an attack."
+  },
+  {
+    "name": "Pinecone",
+    "description": "A rare cone from the mountain pine. Evolves a specific Chainmon when given to it."
+  },
+  {
+    "name": "Cookie",
+    "description": "This cookie is so delicious it will instantly evolve a specific Chainmon when given to it."
+  },
+  {
+    "name": "Enhancer Silver",
+    "description": "A shimmering silver piece used for crafting and upgrading Gear and other items."
+  },
+  {
+    "name": "Cute Bonsai",
+    "description": "Is it a tree? Well, yes.. failry small one though. Makes a great decoration for your house."
+  }
+]

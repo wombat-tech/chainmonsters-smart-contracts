@@ -122,18 +122,22 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         }
 
         pub fun resolveView(_ view: Type): AnyStruct? {
+            let externalMetadata = ChainmonstersRewards.getExternalRewardMetadata(rewardID: self.data.rewardID)
+            let name = externalMetadata != nil ? externalMetadata!["name"] ?? "Chainmonsters Reward #".concat(self.data.rewardID.toString()) : "Chainmonsters Reward #".concat(self.data.rewardID.toString())
+            let description = externalMetadata != nil ? externalMetadata!["description"] ?? "A Chainmonsters Reward" : "A Chainmonsters Reward"
+
             switch view {
                 case Type<MetadataViews.Display>():
                     return MetadataViews.Display(
-                        name: ChainmonstersRewards.getRewardMetaData(rewardID: self.data.rewardID)!,
-                        description: "A Chainmonsters Reward",
+                        name: name,
+                        description: description,
                         thumbnail: MetadataViews.HTTPFile(
                             url: ChainmonstersRewards.getRewardImageURL(rewardID: self.data.rewardID)!,
                         )
                     )
                 case Type<MetadataViews.Edition>():
                     return MetadataViews.Edition(
-                        name: ChainmonstersRewards.getRewardMetaData(rewardID: self.data.rewardID)!,
+                        name: name,
                         number: UInt64(self.data.serialNumber),
                         max: UInt64(ChainmonstersRewards.getNumRewardsMinted(rewardID: self.data.rewardID)!)
                     )
@@ -516,6 +520,17 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         }
 
         return baseUrl.concat(SEASON_SLUGS[data!.season]).concat("/").concat(rewardID.toString()).concat(".png");
+    }
+
+    // Get reward metadata from the contract owner storage, can be upgraded
+    pub fun getExternalRewardMetadata(rewardID: UInt32): {String: String}? {
+        let data = self.account.getCapability<&[{ String: String }]>(/public/ChainmonstersRewardsMetadata).borrow()
+
+        if (data == nil) {
+            return nil
+        }
+
+        return data![rewardID]
     }
 
 
