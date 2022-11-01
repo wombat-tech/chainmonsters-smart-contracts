@@ -94,8 +94,8 @@ An in-game marketplace is in the works and will be published here once available
 The new contract allows to set rewards metadata on the contract owner storage:
 
 ```
-$ flow transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(cat data/rewardsMetadata.json | tr -d "\n" | tr -s " ")"
-$ flow transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(cat data/seasonsMetadata.json | tr -d "\n" | tr -s " ")"
+$ flow transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(yarn --silent json-minify data/rewardsMetadata.json)"
+$ flow transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(yarn --silent json-minify data/seasonsMetadata.json)"
 ```
 
 This command reads the metadata in `data/rewardsMetadata.json`. It expects a format of `[ { "name": "Reward Name", "description": "Reward Description" } ]` the index in the array maps to the rewardID. Index 0 is "not in use"
@@ -104,10 +104,10 @@ This command reads the metadata in `data/rewardsMetadata.json`. It expects a for
 
 ```
 # Testnet
-$ flow -f flow.json -f flow.testnet.json --network testnet transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(cat data/rewardsMetadata.json | tr -d "\n" | tr -s " ")" --signer testnet-deployer
-$ flow -f flow.json -f flow.testnet.json --network testnet transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(cat data/seasonsMetadata.json | tr -d "\n" | tr -s " ")" --signer testnet-deployer
+$ flow -f flow.json -f flow.testnet.json --network testnet transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(yarn --silent json-minify data/rewardsMetadata.json)" --signer testnet-deployer
+$ flow -f flow.json -f flow.testnet.json --network testnet transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(yarn --silent json-minify data/seasonsMetadata.json)" --signer testnet-deployer
 
 # Mainnet
-$ flow -f flow.json -f flow.mainnet.json --network mainnet transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(cat data/rewardsMetadata.json | tr -d "\n" | tr -s " ")" --signer mainnet-rewards-deployer
-$ flow -f flow.json -f flow.mainnet.json --network mainnet transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(cat data/seasonsMetadata.json | tr -d "\n" | tr -s " ")" --signer mainnet-rewards-deployer
+$ flow -f flow.json -f flow.mainnet.json --network mainnet transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(yarn --silent json-minify data/rewardsMetadata.json)" --signer mainnet-rewards-deployer
+$ flow -f flow.json -f flow.mainnet.json --network mainnet transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(yarn --silent json-minify data/seasonsMetadata.json)" --signer mainnet-rewards-deployer
 ```
