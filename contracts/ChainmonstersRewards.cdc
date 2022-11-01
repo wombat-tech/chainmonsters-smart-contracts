@@ -147,7 +147,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
                 case Type<MetadataViews.NFTCollectionDisplay>():
                     return MetadataViews.NFTCollectionDisplay(
                         name: "Chainmonsters Rewards",
-                        description: "An NFT metadata description for Chainmonsters collections",
+                        description: "Chainmonsters is a massive multiplayer online RPG where you catch, battle, trade, explore, and combine different types of monsters and abilities to create strong chain reactions! No game subscription required. Explore the vast lands of Ancora together with your friends on Steam, iOS and Android!",
                         externalURL: MetadataViews.ExternalURL("https://chainmonsters.com"),
                         squareImage: MetadataViews.Media(
                             file: MetadataViews.HTTPFile(
