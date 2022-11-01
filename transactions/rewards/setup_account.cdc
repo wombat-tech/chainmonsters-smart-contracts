@@ -1,24 +1,27 @@
+import NonFungibleToken from "../../contracts/lib/NonFungibleToken.cdc"
 import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
+import MetadataViews from "../../contracts/lib/MetadataViews.cdc"
 
-// This transaction sets up an account to use Chainmonsters
-// by storing an empty NFT collection and creating
-// a public capability for it
-
+/// This transaction is what an account would run
+/// to set itself up to receive NFTs
 transaction {
 
-    prepare(acct: AuthAccount) {
-
-        // First, check to see if an NFT collection already exists
-        if acct.borrow<&ChainmonstersRewards.Collection>(from: /storage/ChainmonstersRewardCollection) == nil {
-
-            // create a new Chainmonsters Collection
-            let collection <- ChainmonstersRewards.createEmptyCollection() as! @ChainmonstersRewards.Collection
-
-            // Put the new Collection in storage
-            acct.save(<-collection, to: /storage/ChainmonstersRewardCollection)
-
-            // create a public capability for the collection
-            acct.link<&{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>(/public/ChainmonstersRewardCollection, target: /storage/ChainmonstersRewardCollection)
+    prepare(signer: AuthAccount) {
+        // Return early if the account already has a collection
+        if signer.borrow<&ChainmonstersRewards.Collection>(from: /storage/ChainmonstersRewardCollection) != nil {
+            return
         }
+
+        // Create a new empty collection
+        let collection <- ChainmonstersRewards.createEmptyCollection()
+
+        // save it to the account
+        signer.save(<-collection, to: /storage/ChainmonstersRewardCollection)
+
+        // create a public capability for the collection
+        signer.link<&{NonFungibleToken.CollectionPublic, ChainmonstersRewards.ChainmonstersRewardCollectionPublic, MetadataViews.ResolverCollection}>(
+            /public/ChainmonstersRewardCollection,
+            target: /storage/ChainmonstersRewardCollection
+        )
     }
 }
