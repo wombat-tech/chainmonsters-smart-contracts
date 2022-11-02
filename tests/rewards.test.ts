@@ -111,7 +111,7 @@ describe("ChainmonstersRewards", () => {
       name: "Chainmon Designer",
       description:
         "Help us design a Chainmon. Send us ideas or sketches and work with our team to bring it to life! You also receive the very first one of its kind including all variations in your team! If you don't feel like designing then choose one of our upcoming in-house designs and claim it instead!",
-      thumbnail: "https://chainmonsters.com/images/rewards/kickstarter/1.png",
+      thumbnail: "https://chainmonsters.com/images/rewards/1.png",
       owner: "0xf8d6e0586b0a20c7",
       type: "A.f8d6e0586b0a20c7.ChainmonstersRewards.NFT",
       royalties: [
@@ -180,7 +180,7 @@ describe("ChainmonstersRewards", () => {
         "&A.f8d6e0586b0a20c7.ChainmonstersRewards.Collection{A.f8d6e0586b0a20c7.ChainmonstersRewards.ChainmonstersRewardCollectionPublic,A.f8d6e0586b0a20c7.NonFungibleToken.CollectionPublic,A.f8d6e0586b0a20c7.NonFungibleToken.Provider,A.f8d6e0586b0a20c7.MetadataViews.ResolverCollection}",
       collectionName: "Chainmonsters Rewards",
       collectionDescription:
-        "An NFT metadata description for Chainmonsters collections",
+        "Chainmonsters is a massive multiplayer online RPG where you catch, battle, trade, explore, and combine different types of monsters and abilities to create strong chain reactions! No game subscription required. Explore the vast lands of Ancora together with your friends on Steam, iOS and Android!",
       collectionExternalURL: "https://chainmonsters.com",
       collectionSquareImage: "https://chainmonsters.com/images/chipleaf.png",
       collectionBannerImage: "https://chainmonsters.com/images/bg.jpg",
@@ -199,18 +199,24 @@ describe("ChainmonstersRewards", () => {
 async function deployContracts(): Promise<[{ events: any[] }]> {
   const to = await getServiceAddress();
 
-  await deployContractByName({
-    name: "lib/NonFungibleToken",
-    to,
-  });
+  await shallResolve(
+    deployContractByName({
+      name: "lib/NonFungibleToken",
+      to,
+    })
+  );
 
-  await deployContractByName({
-    name: "lib/MetadataViews",
-    to,
-  });
+  await shallResolve(
+    deployContractByName({
+      name: "lib/MetadataViews",
+      to,
+    })
+  );
 
-  return deployContractByName({
-    name: "ChainmonstersRewards",
-    to,
-  });
+  return shallResolve(
+    deployContractByName({
+      name: "ChainmonstersRewards",
+      to,
+    })
+  );
 }
