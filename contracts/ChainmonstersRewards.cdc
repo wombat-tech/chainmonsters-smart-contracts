@@ -123,11 +123,9 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
         pub fun resolveView(_ view: Type): AnyStruct? {
             let externalRewardMetadata = ChainmonstersRewards.getExternalRewardMetadata(rewardID: self.data.rewardID)
-            let externalSeasonMetadata = ChainmonstersRewards.getExternalSeasonMetadata(seasonID: ChainmonstersRewards.getRewardSeason(rewardID: self.data.rewardID)!)
 
             let name = externalRewardMetadata != nil ? externalRewardMetadata!["name"] ?? "Chainmonsters Reward #".concat(self.data.rewardID.toString()) : "Chainmonsters Reward #".concat(self.data.rewardID.toString())
             let description = externalRewardMetadata != nil ? externalRewardMetadata!["description"] ?? "A Chainmonsters Reward" : "A Chainmonsters Reward"
-            let seasonSlug = externalSeasonMetadata != nil ? externalSeasonMetadata!["slug"] ?? "unknown" : "unknown"
 
             switch view {
                 case Type<MetadataViews.Display>():
@@ -135,7 +133,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
                         name: name,
                         description: description,
                         thumbnail: MetadataViews.HTTPFile(
-                            url: "https://chainmonsters.com/images/rewards/".concat(seasonSlug).concat("/").concat(self.data.rewardID.toString()).concat(".png")
+                            url: "https://chainmonsters.com/images/rewards/".concat(self.data.rewardID.toString()).concat(".png")
                         )
                     )
                 case Type<MetadataViews.Edition>():
