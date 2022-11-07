@@ -17,11 +17,18 @@ pub struct PurchaseData {
 }
 
 pub fun main(merchantAddress: Address, rewardID: UInt32, price: UFix64): PurchaseData {
-    let name = ChainmonstersRewards.getRewardMetaData(rewardID: rewardID)
-    let url = ChainmonstersRewards.getRewardImageURL(rewardID: rewardID)
+    let externalRewardMetadata = ChainmonstersRewards.getExternalRewardMetadata(rewardID: rewardID)
 
-    if name != nil && url != nil {
-        return PurchaseData(id: UInt64(rewardID), name: name, amount: 1.0, description: "A Chainmonsters Reward", imageURL: url)
+    if (externalRewardMetadata == nil) {
+        panic("Reward not found")
+    }
+
+    let name = externalRewardMetadata!["name"]
+    let description = externalRewardMetadata!["description"]
+    let imageURL = "https://chainmonsters.com/images/rewards/".concat(rewardID.toString()).concat(".png")
+
+    if (name != nil && description != nil) {
+        return PurchaseData(id: UInt64(rewardID), name: name, amount: 1.0, description: description, imageURL: imageURL)
     }
     
     panic("Reward not found")
