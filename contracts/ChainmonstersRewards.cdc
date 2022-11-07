@@ -475,6 +475,10 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         return ChainmonstersRewards.rewardDatas[rewardID]?.season
     }
 
+    // returns the maximum supply of a reward
+    pub fun getRewardMaxSupply(rewardID: UInt32): UInt32? {
+        return ChainmonstersRewards.rewardSupplies[rewardID]
+    }
 
      // isRewardLocked returns a boolean that indicates if a Reward
     //                      can no longer be minted.
