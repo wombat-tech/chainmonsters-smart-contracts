@@ -27,7 +27,7 @@ transaction(amount: UInt64) {
     self.bundlesCollection.borrowCollection(tier: ChainmonstersFoundation.Tier.LEGENDARY)!
       .batchDeposit(tokens: <- self.adminRef.batchMintReward(rewardID: 3, quantity: amount))
 
-    // We always need twice as many items as bundles 
+    // We always need twice as many items as bundles
     // @TODO Optimize this
     let itemsAmount = amount * 2;
 

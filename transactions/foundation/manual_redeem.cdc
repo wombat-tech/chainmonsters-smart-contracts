@@ -1,8 +1,13 @@
 import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
 import ChainmonstersFoundation from "../../contracts/ChainmonstersFoundation.cdc"
 import NonFungibleToken from "../../contracts/lib/NonFungibleToken.cdc"
+import PRNG from "../../contracts/lib/PRNG.cdc"
 
-transaction(nftID: UInt64) {
+/**
+ * Manually raffle for an NFT based on a tier with the chance of an upgrade. 
+ * Salt should be a random number.
+ */
+transaction(rawTier: UInt8, salt: UInt64) {
   let foundationAdminRef: &ChainmonstersFoundation.Admin
   let userCollectionRef: &ChainmonstersRewards.Collection
 
@@ -18,22 +23,21 @@ transaction(nftID: UInt64) {
   }
 
   pre {
-    self.userCollectionRef.borrowNFT(id: nftID) != nil: "NFT does not exist in the user's collection"
-    ChainmonstersFoundation.getBundleTier(rewardID: self.userCollectionRef.borrowReward(id: nftID)!.data!.rewardID!) != nil: "Reward is not a bundle"
+    ChainmonstersFoundation.Tier(rawValue: rawTier) != nil: "Tier is not valid"
   }
 
   execute {
-    // Withdraw bundle NFT
-    let bundleNFT <- self.userCollectionRef.withdraw(withdrawID: nftID) as! @ChainmonstersRewards.NFT
+    let tier = ChainmonstersFoundation.Tier(rawValue: rawTier)!
 
-    // Burn bundle and raffle items
-    let tokens <- self.foundationAdminRef.redeemBundle(nft: <- bundleNFT)
+    let generator <- PRNG.createFrom(blockHeight: getCurrentBlock().height, uuid: salt)
+    let rng = &generator as &PRNG.Generator
 
-    // Deposit the redeemed NFTs into the user's collection
-    self.userCollectionRef.batchDeposit(tokens: <- tokens)
-  }
+    // Raffle item
+    let token <- self.foundationAdminRef.manualRaffle(rng: rng, tier: tier) ?? panic("Did not receive a token")
 
-  post {
-    self.userCollectionRef.ownedNFTs[nftID] == nil: "The NFT should no longer exist in the user's collection"
+    // Deposit the raffled NFTs into the user's collection
+    self.userCollectionRef.deposit(token: <- token)
+
+    destroy generator
   }
 }

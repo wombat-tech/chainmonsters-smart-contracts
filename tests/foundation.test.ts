@@ -7,6 +7,7 @@ import {
   mintFlow,
   sendTransaction,
   shallPass,
+  executeScript,
   shallResolve,
 } from "@onflow/flow-js-testing";
 import path from "path";
@@ -14,7 +15,18 @@ import path from "path";
 // We need to set timeout for a higher number, because some transactions might take up some time
 jest.setTimeout(50000);
 
-describe("ChainmonstersFoundationBundles", () => {
+const RARE_BUNDLE_REWARD_ID = "1";
+const EPIC_BUNDLE_REWARD_ID = "2";
+const LEGENDARY_BUNDLE_REWARD_ID = "3";
+const RARE_ITEM_REWARD_ID = "4";
+const EPIC_ITEM_REWARD_ID = "5";
+const LEGENDARY_ITEM_REWARD_ID = "6";
+
+const RARE_TIER = "0";
+const EPIC_TIER = "1";
+const LEGENDARY_TIER = "2";
+
+describe("ChainmonstersFoundation", () => {
   beforeEach(async () => {
     const basePath = path.resolve(__dirname, "../");
 
@@ -54,7 +66,7 @@ describe("ChainmonstersFoundationBundles", () => {
       sendTransaction(
         "dapperwallet/purchase_bundle",
         [admin, ducAdmin, user],
-        [merchant, "0", "99.0"]
+        [merchant, RARE_TIER, "99.0"]
       )
     );
 
@@ -62,7 +74,7 @@ describe("ChainmonstersFoundationBundles", () => {
     const bundleSoldEvent = result.events.find(
       (e) => e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.BundleSold"
     );
-    expect(bundleSoldEvent.data.tier).toBe("0");
+    expect(bundleSoldEvent.data.tier).toBe(RARE_TIER);
 
     // Check if a token is deposited to the user's account
     const depositEvent = result.events.find(
@@ -104,7 +116,7 @@ describe("ChainmonstersFoundationBundles", () => {
     expect(depositEvent.data.to).toBe(user);
   });
 
-  test.only("can redeem a bundle", async () => {
+  test("redeems RARE bundles correctly", async () => {
     const admin = await getServiceAddress();
     const user = await getAccountAddress("Alice");
 
@@ -114,116 +126,251 @@ describe("ChainmonstersFoundationBundles", () => {
 
     // Mint a bundle NFT for the user
     await shallPass(
-      sendTransaction("rewards/admin/mint_nft", [admin], ["1", user])
+      sendTransaction(
+        "rewards/admin/mint_nft",
+        [admin],
+        [RARE_BUNDLE_REWARD_ID, user]
+      )
     );
 
     // Based on the NFTs minted in `setupFoundation`
     const NEW_NFT_ID = "76";
-
-    emulator.setLogging(true);
 
     // Redeem Bundle
     const [result] = await shallPass(
       sendTransaction("foundation/redeem_bundle", [admin, user], [NEW_NFT_ID])
     );
 
-    emulator.setLogging(false);
+    const redeemEvent = result.events.find(
+      (e) =>
+        e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.BundleRedeemed"
+    );
 
-    //console.log(result);
+    // Redeeming a RARE bundle, so expecting 2 NFTs
+    expect(redeemEvent.data.redeemedIDs.length).toBe(2);
+
+    for (const id of redeemEvent.data.redeemedIDs) {
+      const [rewardID] = await executeScript("rewards/get_nft_rewardID", [
+        user,
+        id,
+      ]);
+
+      expect(Number(rewardID)).toBeGreaterThanOrEqual(4);
+    }
   });
 
-  // test("can claim a bundle", async () => {
-  //   await deployContracts();
+  test("redeems EPIC bundles correctly", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
 
-  //   const admin = await getServiceAddress();
-  //   const user = await getAccountAddress("Alice");
+    await deployContracts();
 
-  //   // Set up account
-  //   await shallPass(sendTransaction("rewards/setup_account", [admin]));
-  //   await shallPass(sendTransaction("rewards/setup_account", [user]));
+    await setupFoundation();
 
-  //   // Create rewards
-  //   await shallPass(
-  //     sendTransaction(
-  //       "rewards/admin/create_reward",
-  //       [admin],
-  //       ["First Reward", "10"]
-  //     )
-  //   );
-  //   await shallPass(
-  //     sendTransaction(
-  //       "rewards/admin/create_reward",
-  //       [admin],
-  //       ["Second Reward", "10"]
-  //     )
-  //   );
-  //   await shallPass(
-  //     sendTransaction(
-  //       "rewards/admin/create_reward",
-  //       [admin],
-  //       ["Third Reward", "10"]
-  //     )
-  //   );
+    // Mint an EPIC bundle NFT for the user
+    await shallPass(
+      sendTransaction(
+        "rewards/admin/mint_nft",
+        [admin],
+        [EPIC_BUNDLE_REWARD_ID, user]
+      )
+    );
 
-  //   // Create bundles
-  //   await shallPass(
-  //     sendTransaction(
-  //       "rewards/admin/create_reward",
-  //       [admin],
-  //       ["First Bundle", "10"]
-  //     )
-  //   );
-  //   await shallPass(
-  //     sendTransaction(
-  //       "rewards/admin/create_reward",
-  //       [admin],
-  //       ["Second Bundle", "10"]
-  //     )
-  //   );
-  //   await shallPass(
-  //     sendTransaction(
-  //       "rewards/admin/create_reward",
-  //       [admin],
-  //       ["Third Bundle", "10"]
-  //     )
-  //   );
+    // Based on the NFTs minted in `setupFoundation`
+    const NEW_NFT_ID = "76";
 
-  //   const REWARD_IDS = [1, 2, 3];
-  //   const BUNDLE_IDS = [4, 5, 6];
+    // Redeem Bundle
+    const [result] = await shallPass(
+      sendTransaction("foundation/redeem_bundle", [admin, user], [NEW_NFT_ID])
+    );
 
-  //   // Mint Rewards
-  //   for (const id of REWARD_IDS) {
-  //     await shallPass(
-  //       sendTransaction(
-  //         "rewards/admin/batch_mint_reward",
-  //         [admin],
-  //         [id.toString(), "10", admin]
-  //       )
-  //     );
-  //   }
+    const redeemEvent = result.events.find(
+      (e) =>
+        e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.BundleRedeemed"
+    );
 
-  //   // Mint 1 bundle for user
-  //   const [result] = await shallPass(
-  //     sendTransaction(
-  //       "rewards/admin/mint_nft",
-  //       [admin],
-  //       [BUNDLE_IDS[0].toString(), user]
-  //     )
-  //   );
+    expect(redeemEvent.data.redeemedIDs.length).toBe(3);
 
-  //   const newNFTId: number = result.events.find(
-  //     (e) => e.type === "A.f8d6e0586b0a20c7.ChainmonstersRewards.NFTMinted"
-  //   ).data.NFTID;
+    const rewardIDs: string[] = [];
 
-  //   // Claim 1 bundle
-  //   await shallPass(
-  //     sendTransaction(
-  //       "foundation/claim_bundle_nft",
-  //       [admin, user],
-  //       [newNFTId.toString(), BUNDLE_IDS.map(String)]
-  //     )
-  //   );
-  // });
+    for (const id of redeemEvent.data.redeemedIDs) {
+      const [rewardID] = await executeScript("rewards/get_nft_rewardID", [
+        user,
+        id,
+      ]);
+
+      rewardIDs.push(rewardID);
+    }
+
+    // Must have at least one EPIC or better reward
+    expect(
+      rewardIDs.some((id) => Number(id) >= Number(EPIC_ITEM_REWARD_ID))
+    ).toBe(true);
+  });
+
+  test("redeems LEGENDARY bundles correctly", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    // Mint an EPIC bundle NFT for the user
+    await shallPass(
+      sendTransaction("rewards/admin/mint_nft", [admin], ["3", user])
+    );
+
+    // Based on the NFTs minted in `setupFoundation`
+    const NEW_NFT_ID = "76";
+
+    // Redeem Bundle
+    const [result] = await shallPass(
+      sendTransaction("foundation/redeem_bundle", [admin, user], [NEW_NFT_ID])
+    );
+
+    const redeemEvent = result.events.find(
+      (e) =>
+        e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.BundleRedeemed"
+    );
+
+    expect(redeemEvent.data.redeemedIDs.length).toBe(3);
+
+    const rewardIDs: string[] = [];
+
+    for (const id of redeemEvent.data.redeemedIDs) {
+      const [rewardID] = await executeScript("rewards/get_nft_rewardID", [
+        user,
+        id,
+      ]);
+
+      rewardIDs.push(rewardID);
+    }
+
+    // Must have at least one LEGENDARY reward
+    expect(rewardIDs).toContain(LEGENDARY_ITEM_REWARD_ID);
+  });
+
+  test("rolls 69 with a seed number of 420 :kappa:", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    const [, , logs] = await shallPass(
+      sendTransaction(
+        "foundation/__tests__/test_redemption",
+        [admin, user],
+        [RARE_TIER, "420"]
+      )
+    );
+
+    expect(logs).toContain("Rolled: 69");
+  });
+
+  test("rolls 1; upgrades RARE and returns a LEGENDARY item", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    // Rolling for RARE item but seed 590416 rolls a 1, so upgrading to LEGENDARY
+    const [result, , logs] = await shallPass(
+      sendTransaction(
+        "foundation/__tests__/test_redemption",
+        [admin, user],
+        [RARE_TIER, "590416"]
+      )
+    );
+
+    expect(logs).toContain("Rolled: 1");
+
+    const upgradeRolledEvent = result.events.find(
+      (e) =>
+        e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.UpgradeRolled"
+    );
+
+    expect(upgradeRolledEvent.data.tier).toEqual(LEGENDARY_TIER);
+
+    const [rewardID] = await executeScript("rewards/get_nft_rewardID", [
+      user,
+      upgradeRolledEvent.data.nftID,
+    ]);
+
+    expect(rewardID).toEqual(LEGENDARY_ITEM_REWARD_ID);
+  });
+
+  test("rolls 1; upgrades EPIC and returns a LEGENDARY item", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    // Rolling for EPIC item but seed 590416 rolls a 1, so upgrading to LEGENDARY
+    const [result, , logs] = await shallPass(
+      sendTransaction(
+        "foundation/__tests__/test_redemption",
+        [admin, user],
+        [EPIC_TIER, "590416"]
+      )
+    );
+
+    expect(logs).toContain("Rolled: 1");
+
+    const upgradeRolledEvent = result.events.find(
+      (e) =>
+        e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.UpgradeRolled"
+    );
+
+    expect(upgradeRolledEvent.data.tier).toEqual(LEGENDARY_TIER);
+
+    const [rewardID] = await executeScript("rewards/get_nft_rewardID", [
+      user,
+      upgradeRolledEvent.data.nftID,
+    ]);
+
+    expect(rewardID).toEqual(LEGENDARY_ITEM_REWARD_ID);
+  });
+
+  test("rolls 6; upgrades RARE and returns an EPIC item", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    // Rolling for RARE item but seed 812409 rolls a 6, so upgrading to EPIC
+    const [result, , logs] = await shallPass(
+      sendTransaction(
+        "foundation/__tests__/test_redemption",
+        [admin, user],
+        [RARE_TIER, "812409"]
+      )
+    );
+
+    expect(logs).toContain("Rolled: 6");
+
+    const upgradeRolledEvent = result.events.find(
+      (e) =>
+        e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.UpgradeRolled"
+    );
+
+    expect(upgradeRolledEvent.data.tier).toEqual(EPIC_TIER);
+
+    const [rewardID] = await executeScript("rewards/get_nft_rewardID", [
+      user,
+      upgradeRolledEvent.data.nftID,
+    ]);
+
+    expect(rewardID).toEqual(EPIC_ITEM_REWARD_ID);
+  });
 });
 
 async function deployContracts(): Promise<[{ events: any[] }]> {

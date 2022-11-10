@@ -33,7 +33,7 @@ pub contract ChainmonstersFoundation {
 
     let collection = tiersCollection.borrowCollection(tier: tier)!
 
-    let ids = collection.getIDs() 
+    let ids = collection.getIDs()
 
     if (ids.length == 0) {
       return nil
@@ -106,28 +106,28 @@ pub contract ChainmonstersFoundation {
 
   /**
    * Rolls for upgrades and returns the resulting NFT
-   * 
+   *
    * RARE rolls: 2% chance to upgrade to LEGENDARY, 8% chance to upgrade to EPIC
    * EPIC rolls: 2% chance to upgrade to LEGENDARY
-   */ 
+   */
   priv fun rollForUpgrade(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT? {
     pre {
       tier != Tier.LEGENDARY: "Can't roll for LEGENDARY upgrade"
     }
 
-    // Roll the dice 0.00 - 1.00
-    let roll = rng.ufix64()
+    // Roll the dice 1 - 100
+    let roll = rng.range(1, 100)
 
     log("Rolled: ".concat(roll.toString()))
 
     var nft: @NonFungibleToken.NFT? <- nil
 
-    if (roll <= 0.02) {
+    if (roll <= 2) {
       // Every RARE and EPIC roll has a 2% chance of a LEGENDARY upgrade
       nft <-! self.pickBonusNFT(rng: rng, tier: Tier.LEGENDARY)
 
       emit UpgradeRolled(nftID: nft?.id, tier: Tier.LEGENDARY.rawValue)
-    } else if (tier == Tier.RARE && roll <= 0.08) {
+    } else if (tier == Tier.RARE && roll <= 8) {
       // RARE rolls have a 8% chance of an EPIC upgrade
       nft <-! self.pickBonusNFT(rng: rng, tier: Tier.EPIC)
 
@@ -136,8 +136,6 @@ pub contract ChainmonstersFoundation {
       // Otherwise just return the reserved item
       nft <-! self.pickReservedNFT(rng: rng, tier: tier)
     }
-
-    emit UpgradeRolled(nftID: nft?.id!, tier: tier.rawValue)
 
     return <- nft
   }
@@ -184,14 +182,18 @@ pub contract ChainmonstersFoundation {
   }
 
   pub resource Admin {
+    /**
+     * Sell a random bundle of a given tier
+     */
     pub fun sellBundle(tier: Tier): @NonFungibleToken.NFT {
-      let nft <- ChainmonstersFoundation.pickBundle(tier: tier) 
+      let nft <- ChainmonstersFoundation.pickBundle(tier: tier)
         ?? panic("Could not sell bundle of tier ".concat(tier.rawValue.toString()))
 
       emit BundleSold(nftID: nft.id, tier: tier.rawValue)
-      
+
       return <- nft
     }
+
     /**
      * Redeem a bundle for NFTs
      */
@@ -220,7 +222,7 @@ pub contract ChainmonstersFoundation {
           tokens.deposit(token: <- token2)
         // EPIC rolls once for an EPIC item and twice for RARE items
         case Tier.EPIC:
-          let token1 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE)
+          let token1 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.EPIC)
             ?? panic("Could not receive an NFT from the roll")
           tokens.deposit(token: <- token1)
 
@@ -263,6 +265,14 @@ pub contract ChainmonstersFoundation {
 
       // Return the tokens
       return <- tokens
+    }
+
+    /**
+     * Manually raffle for an NFT based on a tier with the chance of an upgrade.
+     * Can be used for testing or giveaways
+     */
+    pub fun manualRaffle(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT? {
+      return <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: tier)
     }
 
     pub fun createNewAdmin(): @Admin {
