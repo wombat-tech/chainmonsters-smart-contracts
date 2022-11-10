@@ -48,6 +48,7 @@
         "mainnet": "1d7e57aa55817448"
       }
     },
+    "PRNG": "./contracts/lib/PRNG.cdc",
     "DapperUtilityCoin": {
       "source": "./contracts/lib/DapperUtilityCoin.cdc",
       "aliases": {
@@ -75,15 +76,21 @@
         "testnet": "75783e3c937304a8",
         "mainnet": "ec93a9a9ab336096"
       }
-    }
+    },
+    "ChainmonstersFoundation": "./contracts/ChainmonstersFoundation.cdc"
   },
   "deployments": {
     "emulator": {
       "emulator-account": [
         "DapperUtilityCoin",
+        "PRNG",
         "ChainmonstersRewards",
         "ChainmonstersMarketplace",
-        "ChainmonstersProducts"
+        "ChainmonstersProducts",
+        {
+          "name": "ChainmonstersFoundation",
+          "args": []
+        }
       ]
     }
   },
