@@ -143,8 +143,23 @@ pub contract ChainmonstersFoundation {
   /**
    * Gets the tier of a bundle with the given rewardID or nil if it's not registered as a bundle.
    */
-  pub fun getBundleTier(rewardID: UInt32): Tier? {
+  pub fun getTierFromBundleRewardID(rewardID: UInt32): Tier? {
     return self.bundleRewardTierMapping[rewardID]
+  }
+
+  /**
+   * Gets the rewardID of a given tier or nil if it's not registered as a bundle.
+   */
+  pub fun getBundleRewardIDFromTier(tier: Tier): UInt32? {
+    for rewardID in self.bundleRewardTierMapping.keys {
+      let currentTier = self.bundleRewardTierMapping[rewardID]!
+
+      if (currentTier == tier) {
+        return rewardID
+      }
+    }
+
+    return nil
   }
 
   /**

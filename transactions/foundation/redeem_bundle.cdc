@@ -19,7 +19,7 @@ transaction(nftID: UInt64) {
 
   pre {
     self.userCollectionRef.borrowNFT(id: nftID) != nil: "NFT does not exist in the user's collection"
-    ChainmonstersFoundation.getBundleTier(rewardID: self.userCollectionRef.borrowReward(id: nftID)!.data!.rewardID!) != nil: "Reward is not a bundle"
+    ChainmonstersFoundation.getTierFromBundleRewardID(rewardID: self.userCollectionRef.borrowReward(id: nftID)!.data!.rewardID!) != nil: "Reward is not a bundle"
   }
 
   execute {
