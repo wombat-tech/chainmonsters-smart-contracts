@@ -1,14 +1,15 @@
 import {
   deployContractByName,
   emulator,
+  executeScript,
   getAccountAddress,
   getServiceAddress,
   init,
   mintFlow,
   sendTransaction,
   shallPass,
-  executeScript,
   shallResolve,
+  shallRevert,
 } from "@onflow/flow-js-testing";
 import path from "path";
 
@@ -370,6 +371,106 @@ describe("ChainmonstersFoundation", () => {
     ]);
 
     expect(rewardID).toEqual(EPIC_ITEM_REWARD_ID);
+  });
+
+  test("rolls 66; returns a RARE item on RARE roll", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    // Rolling for RARE item but seed 812409 rolls a 6, so upgrading to EPIC
+    const [result, , logs] = await shallPass(
+      sendTransaction(
+        "foundation/__tests__/test_redemption",
+        [admin, user],
+        [RARE_TIER, "1"]
+      )
+    );
+
+    expect(logs).toContain("Rolled: 66");
+
+    const upgradeRolledEvent = result.events.find(
+      (e) =>
+        e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.UpgradeRolled"
+    );
+
+    // No upgrade event
+    expect(upgradeRolledEvent).toBeUndefined();
+
+    const depositEvent = result.events.find(
+      (e) => e.type === "A.f8d6e0586b0a20c7.ChainmonstersRewards.Deposit"
+    );
+
+    const [rewardID] = await executeScript("rewards/get_nft_rewardID", [
+      user,
+      depositEvent.data.id,
+    ]);
+
+    // Deposited a RARE item
+    expect(rewardID).toEqual(RARE_ITEM_REWARD_ID);
+  });
+
+  test("rolls 66; returns a EPIC item on EPIC roll", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    // Rolling for RARE item but seed 812409 rolls a 6, so upgrading to EPIC
+    const [result, , logs] = await shallPass(
+      sendTransaction(
+        "foundation/__tests__/test_redemption",
+        [admin, user],
+        [EPIC_TIER, "1"]
+      )
+    );
+
+    expect(logs).toContain("Rolled: 66");
+
+    const upgradeRolledEvent = result.events.find(
+      (e) =>
+        e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.UpgradeRolled"
+    );
+
+    // No upgrade event
+    expect(upgradeRolledEvent).toBeUndefined();
+
+    const depositEvent = result.events.find(
+      (e) => e.type === "A.f8d6e0586b0a20c7.ChainmonstersRewards.Deposit"
+    );
+
+    const [rewardID] = await executeScript("rewards/get_nft_rewardID", [
+      user,
+      depositEvent.data.id,
+    ]);
+
+    // Deposited a RARE item
+    expect(rewardID).toEqual(EPIC_ITEM_REWARD_ID);
+  });
+
+  test("can not roll for LEGENDARY item", async () => {
+    const admin = await getServiceAddress();
+    const user = await getAccountAddress("Alice");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    // Rolling for RARE item but seed 812409 rolls a 6, so upgrading to EPIC
+    const [, error] = await shallRevert(
+      sendTransaction(
+        "foundation/__tests__/test_redemption",
+        [admin, user],
+        [LEGENDARY_TIER, "1"]
+      )
+    );
+
+    expect(error).toContain("Can't roll for LEGENDARY upgrade");
   });
 });
 
