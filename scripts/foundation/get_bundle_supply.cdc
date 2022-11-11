@@ -6,9 +6,8 @@ import ChainmonstersFoundation from "../../contracts/ChainmonstersFoundation.cdc
  */
 pub fun main(admin: Address): [Int?] {
     let collection = getAccount(admin)
-      .getCapability<&{ChainmonstersFoundation.TiersCollectionPublic}>(
-        ChainmonstersFoundation.BundlesCollectionPublicPath
-      ).borrow() ?? panic("Could not borrow bundle collection")
+      .getCapability<&{ChainmonstersFoundation.TiersCollectionPublic}>(/public/cmfBundlesCollection)
+      .borrow() ?? panic("Could not borrow bundle collection")
 
     return [
       collection.collectionSize(tier: ChainmonstersFoundation.Tier.RARE),

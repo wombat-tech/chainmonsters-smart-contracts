@@ -16,7 +16,6 @@ pub contract ChainmonstersFoundation {
   }
 
   pub let BundlesCollectionStoragePath: StoragePath
-  pub let BundlesCollectionPublicPath: PublicPath
   pub let ReservedTiersCollectionStoragePath: StoragePath
   pub let BonusTiersCollectionStoragePath: StoragePath
   pub let AdminStoragePath: StoragePath
@@ -330,7 +329,6 @@ pub contract ChainmonstersFoundation {
     let bundleRewardIDs:[UInt32] = [1,2,3]
 
     self.BundlesCollectionStoragePath = /storage/cmfBundlesCollection
-    self.BundlesCollectionPublicPath = /public/cmfBundlesCollection
     self.ReservedTiersCollectionStoragePath =  /storage/cmfReservedTiersCollection
     self.BonusTiersCollectionStoragePath = /storage/cmfBonusTiersCollection
     self.AdminStoragePath = /storage/cmfAdmin
@@ -351,7 +349,7 @@ pub contract ChainmonstersFoundation {
 
     // Public interface for bundle collections
     self.account.link<&{TiersCollectionPublic}>(
-      self.BundlesCollectionPublicPath,
+      /public/cmfBundlesCollection,
       target: self.BundlesCollectionStoragePath
     )
 
