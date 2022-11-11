@@ -1,13 +1,12 @@
 import {
   deployContractByName,
   emulator,
+  executeScript,
   getServiceAddress,
   init,
   sendTransaction,
   shallPass,
-  executeScript,
-  shallResolve,
-} from "flow-js-testing";
+} from "@onflow/flow-js-testing";
 import path from "path";
 import rewardsMetadata from "../data/rewardsMetadata.json";
 import seasonsMetadata from "../data/seasonsMetadata.json";
@@ -18,16 +17,13 @@ jest.setTimeout(50000);
 describe("ChainmonstersRewards", () => {
   beforeEach(async () => {
     const basePath = path.resolve(__dirname, "../");
-    const port = 8080;
-    const logging = false;
 
-    await init(basePath, { port, logging });
-    return emulator.start(port);
+    await init(basePath);
+    await emulator.start({ logging: true });
   });
 
-  // Stop emulator, so it could be restarted
   afterEach(async () => {
-    return emulator.stop();
+    await emulator.stop();
   });
 
   test("should deploy the contracts", async () => {
@@ -91,21 +87,19 @@ describe("ChainmonstersRewards", () => {
       sendTransaction(
         "rewards/admin/create_reward",
         [signer],
-        ["First reward", 1000]
+        ["First reward", "1000"]
       )
     );
 
     // Mint NFT
     await shallPass(
-      sendTransaction("rewards/admin/mint_nft", [signer], [1, signer])
+      sendTransaction("rewards/admin/mint_nft", [signer], ["1", signer])
     );
 
-    const [nftData] = await shallResolve(
-      executeScript({
-        name: "rewards/get_nft_view",
-        args: [signer, 1],
-      })
-    );
+    const [nftData] = await executeScript({
+      name: "rewards/get_nft_view",
+      args: [signer, "1"],
+    });
 
     expect(nftData).toEqual({
       name: "Chainmon Designer",
@@ -159,7 +153,7 @@ describe("ChainmonstersRewards", () => {
         },
       ],
       externalURL: "https://chainmonsters.com/rewards/1",
-      serialNumber: 1,
+      serialNumber: "1",
       collectionPublicPath: {
         domain: "public",
         identifier: "ChainmonstersRewardCollection",
@@ -199,21 +193,21 @@ describe("ChainmonstersRewards", () => {
 async function deployContracts(): Promise<[{ events: any[] }]> {
   const to = await getServiceAddress();
 
-  await shallResolve(
+  await shallPass(
     deployContractByName({
       name: "lib/NonFungibleToken",
       to,
     })
   );
 
-  await shallResolve(
+  await shallPass(
     deployContractByName({
       name: "lib/MetadataViews",
       to,
     })
   );
 
-  return shallResolve(
+  return shallPass(
     deployContractByName({
       name: "ChainmonstersRewards",
       to,
