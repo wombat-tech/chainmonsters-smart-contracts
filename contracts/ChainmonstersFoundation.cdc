@@ -28,7 +28,7 @@ pub contract ChainmonstersFoundation {
    */
   priv fun pickBundle(tier: Tier): @NonFungibleToken.NFT? {
     let tiersCollection =
-      ChainmonstersFoundation.account.borrow<&ChainmonstersFoundation.TiersCollection>(
+      self.account.borrow<&TiersCollection>(
         from: self.BundlesCollectionStoragePath
       ) ?? panic("Could not borrow bundles collection")
 
@@ -55,7 +55,7 @@ pub contract ChainmonstersFoundation {
    */
   priv fun pickReservedNFT(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT? {
     let tiersCollection =
-      ChainmonstersFoundation.account.borrow<&ChainmonstersFoundation.TiersCollection>(
+      self.account.borrow<&TiersCollection>(
         from: self.ReservedTiersCollectionStoragePath
       ) ?? panic("Could not borrow reserved tiers collection")
 
@@ -79,7 +79,7 @@ pub contract ChainmonstersFoundation {
    */
   priv fun pickBonusNFT(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT? {
     let tiersCollection =
-      ChainmonstersFoundation.account.borrow<&ChainmonstersFoundation.TiersCollection>(
+      self.account.borrow<&TiersCollection>(
         from: self.BonusTiersCollectionStoragePath
       ) ?? panic("Could not borrow bonus tiers collection")
 
@@ -344,7 +344,7 @@ pub contract ChainmonstersFoundation {
     let admin <- create Admin()
 
     // Bundles
-    self.account.save<@ChainmonstersFoundation.TiersCollection>(
+    self.account.save<@TiersCollection>(
       <- admin.createNewTiersCollection(),
       to: self.BundlesCollectionStoragePath
     )
@@ -356,13 +356,13 @@ pub contract ChainmonstersFoundation {
     )
 
     // Reserved Items
-    self.account.save<@ChainmonstersFoundation.TiersCollection>(
+    self.account.save<@TiersCollection>(
       <- admin.createNewTiersCollection(),
       to: self.ReservedTiersCollectionStoragePath
     )
 
     // Bonus Items
-    self.account.save<@ChainmonstersFoundation.TiersCollection>(
+    self.account.save<@TiersCollection>(
       <- admin.createNewTiersCollection(),
       to: self.BonusTiersCollectionStoragePath
     )
