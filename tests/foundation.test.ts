@@ -82,6 +82,12 @@ describe("ChainmonstersFoundation", () => {
       (e) => e.type === "A.f8d6e0586b0a20c7.ChainmonstersRewards.Deposit"
     );
     expect(depositEvent.data.to).toBe(user);
+
+    // Check if the RARE bundle supply has decreased
+    const [supplies] = await executeScript("foundation/get_bundle_supply", [
+      admin,
+    ]);
+    expect(supplies).toEqual(["4", "5", "5"]);
   });
 
   test("can purchase a bundle via fungible token", async () => {
@@ -93,14 +99,14 @@ describe("ChainmonstersFoundation", () => {
     await setupFoundation();
 
     // Give user some FLOW token for the transaction
-    await mintFlow(user, "100.0");
+    await mintFlow(user, "10000.0");
 
     // Purchase Bundle
     const [result] = await shallPass(
       sendTransaction(
         "foundation/purchase_bundle",
         [admin, user],
-        ["0", "99.0", "/storage/flowTokenVault"]
+        [LEGENDARY_TIER, "9999.0", "/storage/flowTokenVault"]
       )
     );
 
@@ -108,13 +114,19 @@ describe("ChainmonstersFoundation", () => {
     const bundleSoldEvent = result.events.find(
       (e) => e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.BundleSold"
     );
-    expect(bundleSoldEvent.data.tier).toBe("0");
+    expect(bundleSoldEvent.data.tier).toBe(LEGENDARY_TIER);
 
     // Check if a token is deposited to the user's account
     const depositEvent = result.events.find(
       (e) => e.type === "A.f8d6e0586b0a20c7.ChainmonstersRewards.Deposit"
     );
     expect(depositEvent.data.to).toBe(user);
+
+    // Check if the RARE bundle supply has decreased
+    const [supplies] = await executeScript("foundation/get_bundle_supply", [
+      admin,
+    ]);
+    expect(supplies).toEqual(["5", "5", "4"]);
   });
 
   test("redeems RARE bundles correctly", async () => {
@@ -546,4 +558,10 @@ async function setupFoundation() {
   await shallPass(
     sendTransaction("foundation/__tests__/provide_items", [admin], ["5"], 9999)
   );
+
+  const [supplies] = await executeScript("foundation/get_bundle_supply", [
+    admin,
+  ]);
+
+  expect(supplies).toEqual(["5", "5", "5"]);
 }

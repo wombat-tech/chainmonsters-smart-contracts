@@ -16,6 +16,7 @@ pub contract ChainmonstersFoundation {
   }
 
   pub let BundlesCollectionStoragePath: StoragePath
+  pub let BundlesCollectionPublicPath: PublicPath
   pub let ReservedTiersCollectionStoragePath: StoragePath
   pub let BonusTiersCollectionStoragePath: StoragePath
   pub let AdminStoragePath: StoragePath
@@ -163,9 +164,17 @@ pub contract ChainmonstersFoundation {
   }
 
   /**
+   * The interface to be linked publicly.
+   * Any user can check how many NFTs are still available in a given tier.
+   */
+  pub resource interface TiersCollectionPublic {
+    pub fun collectionSize(tier: Tier): Int?
+  }
+
+  /**
    * A resource that holds three different ChainmonstersRewards collections, one for each tier
    */
-  pub resource TiersCollection {
+  pub resource TiersCollection: TiersCollectionPublic {
     priv let rareCollection: @ChainmonstersRewards.Collection
     priv let epicCollection: @ChainmonstersRewards.Collection
     priv let legendaryCollection: @ChainmonstersRewards.Collection
@@ -178,6 +187,22 @@ pub contract ChainmonstersFoundation {
           return &self.epicCollection as &ChainmonstersRewards.Collection
         case Tier.LEGENDARY:
           return &self.legendaryCollection as &ChainmonstersRewards.Collection
+        default:
+          return nil
+      }
+    }
+
+    /**
+     * Returns the number of NFTs still available in the given tier
+     */
+    pub fun collectionSize(tier: Tier): Int? {
+      switch tier {
+        case Tier.RARE:
+          return self.rareCollection.getIDs().length
+        case Tier.EPIC:
+          return self.epicCollection.getIDs().length
+        case Tier.LEGENDARY:
+          return self.legendaryCollection.getIDs().length
         default:
           return nil
       }
@@ -305,6 +330,7 @@ pub contract ChainmonstersFoundation {
     let bundleRewardIDs:[UInt32] = [1,2,3]
 
     self.BundlesCollectionStoragePath = /storage/cmfBundlesCollection
+    self.BundlesCollectionPublicPath = /public/cmfBundlesCollection
     self.ReservedTiersCollectionStoragePath =  /storage/cmfReservedTiersCollection
     self.BonusTiersCollectionStoragePath = /storage/cmfBonusTiersCollection
     self.AdminStoragePath = /storage/cmfAdmin
@@ -321,6 +347,12 @@ pub contract ChainmonstersFoundation {
     self.account.save<@ChainmonstersFoundation.TiersCollection>(
       <- admin.createNewTiersCollection(),
       to: self.BundlesCollectionStoragePath
+    )
+
+    // Public interface for bundle collections
+    self.account.link<&{TiersCollectionPublic}>(
+      self.BundlesCollectionPublicPath,
+      target: self.BundlesCollectionStoragePath
     )
 
     // Reserved Items
