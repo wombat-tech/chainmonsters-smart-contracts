@@ -315,7 +315,7 @@ pub contract ChainmonstersFoundation {
     }
 
     pub fun createNewAdmin(): @Admin {
-      return <-create Admin()
+      return <- create Admin()
     }
 
     pub fun createNewTiersCollection(): @TiersCollection {

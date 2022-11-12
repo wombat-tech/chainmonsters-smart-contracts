@@ -49,6 +49,20 @@
       }
     },
     "PRNG": "./contracts/lib/PRNG.cdc",
+    "OnChainMultiSig": {
+      "source": "./contracts/lib/OnChainMultiSig.cdc",
+      "aliases": {
+        "testnet": "5a5b0a73a29e83f1",
+        "mainnet": "220c1b4155f86f2f"
+      }
+    },
+    "FiatToken": {
+      "source": "./contracts/lib/FiatToken.cdc",
+      "aliases": {
+        "testnet": "a983fecbed621163",
+        "mainnet": "b19436aae4d94622"
+      }
+    },
     "DapperUtilityCoin": {
       "source": "./contracts/lib/DapperUtilityCoin.cdc",
       "aliases": {
