@@ -91,7 +91,12 @@
         "mainnet": "ec93a9a9ab336096"
       }
     },
-    "ChainmonstersFoundation": "./contracts/ChainmonstersFoundation.cdc"
+    "ChainmonstersFoundation": {
+      "source": "./contracts/ChainmonstersFoundation.cdc",
+      "aliases": {
+        "testnet": "75783e3c937304a8"
+      }
+    }
   },
   "deployments": {
     "emulator": {
