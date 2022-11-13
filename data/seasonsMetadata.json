@@ -14,5 +14,13 @@
   {
     "name": "Closed Beta",
     "slug": "closedbeta"
+  },
+  {
+    "name": "Undefined",
+    "slug": "undefined"
+  },
+  {
+    "name": "Foundation",
+    "slug": "foundation"
   }
 ]

@@ -254,5 +254,57 @@
   {
     "name": "Cute Bonsai",
     "description": "Is it a tree? Well, yes.. failry small one though. Makes a great decoration for your house."
+  },
+  {
+    "name": "Rare Foundation Pack",
+    "description": "Includes 2 rare furniture items from the Chainmonsters Foundation Sale. Open on chainmonsters.com"
+  },
+  {
+    "name": "Epic Foundation Pack",
+    "description": "Includes 2 rare furniture items and 1 exclusive house from the Chainmonsters Foundation Sale. Open on chainmonsters.com"
+  },
+  {
+    "name": "Legendary Foundation Pack",
+    "description": "Includes 2 rare furniture items and 1 exclusive island from the Chainmonsters Foundation Sale. Open on chainmonsters.com"
+  },
+  {
+    "name": "Aetherian Statue",
+    "description": "This massive statue of a mysterious Chainmon called Aetherian is made out of a special material that glows day and night. The creator is unknown but it seems to come from ancient times..."
+  },
+  {
+    "name": "Crystal Cache",
+    "description": "A collection of emissive Crystals, collected from the depths of Ancora. Bursting with energy, yet to be discovered."
+  },
+  {
+    "name": "Hybrid Planter",
+    "description": "A hybrid planter that inhibits a special plant. N-Corp is categorizing specimen from all over the world and puts them into those closed up systems."
+  },
+  {
+    "name": "Majestic Fountain",
+    "description": "Owning your very exclusive fountain not only catches all the attention, it also serves as a nice access to fresh water for the creatures on Ancora."
+  },
+  {
+    "name": "Wooden Lamp",
+    "description": "Having a cozy, warm lamp inside a tree will make any visitors feel just at home!"
+  },
+  {
+    "name": "Holo Projector",
+    "description": "Place this Holographic projector anywhere and choose what to display! Any Chainmon can be turned into a hologram!"
+  },
+  {
+    "name": "Metaverse Frame",
+    "description": "A window into other worlds... Displays an NFT from your wallet directly in-game."
+  },
+  {
+    "name": "Nordic Island",
+    "description": "An exclusive island based on a northern-European shore and coastline. Rough cliffs and windy weathers provide a unique view and environment."
+  },
+  {
+    "name": "Lakeside Island",
+    "description": "An exclusive island based on a large lake and deep forest all around. Super cozy atmosphere all year around."
+  },
+  {
+    "name": "Tropical Island",
+    "description": "An exclusive island based on a tropical island. Palms, beaches and warm weather define this unique look and atmosphere"
   }
 ]
