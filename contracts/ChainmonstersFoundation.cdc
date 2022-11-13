@@ -266,7 +266,7 @@ pub contract ChainmonstersFoundation {
       if (tier == Tier.RARE) {
         assert(tokens.getIDs().length == 2, message: "Did not return 2 tokens for RARE redeem")
       } else {
-        assert(tokens.getIDs().length == 3, message: "Did not return 3 tokens for RARE redeem")
+        assert(tokens.getIDs().length == 3, message: "Did not return 3 tokens for EPIC/LEGENDARY redeem")
       }
 
       emit BundleRedeemed(nftID: nft.id, tier: tier.rawValue, redeemedIDs: tokens.getIDs());
@@ -298,10 +298,7 @@ pub contract ChainmonstersFoundation {
     }
   }
 
-  // @TODO: Revert this when deploying
-  //init(bundleRewardIDs: [UInt32]) {
   init() {
-    let bundleRewardIDs:[UInt32] = [1,2,3]
 
     self.BundlesCollectionStoragePath = /storage/cmfBundlesCollection
     self.ReservedTiersCollectionStoragePath =  /storage/cmfReservedTiersCollection
@@ -309,9 +306,9 @@ pub contract ChainmonstersFoundation {
     self.AdminStoragePath = /storage/cmfAdmin
 
     self.bundleRewardTierMapping = {
-      bundleRewardIDs[0]: Tier.RARE,
-      bundleRewardIDs[1]: Tier.EPIC,
-      bundleRewardIDs[2]: Tier.LEGENDARY
+      64: Tier.RARE,
+      65: Tier.EPIC,
+      66: Tier.LEGENDARY
     }
 
     let admin <- create Admin()
