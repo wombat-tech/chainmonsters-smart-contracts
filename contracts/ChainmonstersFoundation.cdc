@@ -25,7 +25,7 @@ pub contract ChainmonstersFoundation {
   /**
    * Returns a random bundle NFT of a given tier.
    */
-  priv fun pickBundle(tier: Tier): @NonFungibleToken.NFT? {
+  priv fun pickBundle(tier: Tier): @NonFungibleToken.NFT {
     let tiersCollection =
       self.account.borrow<&TiersCollection>(
         from: self.BundlesCollectionStoragePath
@@ -35,9 +35,7 @@ pub contract ChainmonstersFoundation {
 
     let ids = collection.getIDs()
 
-    if (ids.length == 0) {
-      return nil
-    }
+    assert(ids.length > 0, message: "No bundles available for tier ".concat(tier.rawValue.toString()))
 
     let rng <- PRNG.createFrom(blockHeight: getCurrentBlock().height, uuid: UInt64(ids.length))
 
@@ -49,10 +47,9 @@ pub contract ChainmonstersFoundation {
   }
 
   /**
-   * This function returns an NFT from the reserved.
-   * If no NFTs are left in the given tier it will try to find one in the lower tiers or return nil if all are gone.
+   * This function returns an NFT from the reserved collection.
    */
-  priv fun pickReservedNFT(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT? {
+  priv fun pickReservedNFT(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT {
     let tiersCollection =
       self.account.borrow<&TiersCollection>(
         from: self.ReservedTiersCollectionStoragePath
@@ -63,9 +60,7 @@ pub contract ChainmonstersFoundation {
 
     let ids = collection.getIDs()
 
-    if (ids.length == 0) {
-      return nil
-    }
+    assert(ids.length > 0, message: "No reserved NFTs available for tier ".concat(tier.rawValue.toString()))
 
     let index = UInt64(rng.range(0, UInt256(ids.length - 1)))
 
@@ -76,7 +71,7 @@ pub contract ChainmonstersFoundation {
    * This function tries to return a random NFT from the bonus collections, starting with the given tier.
    * If no NFTs are left in the given tier it will try to find one in the lower tiers or return nil if all are gone.
    */
-  priv fun pickBonusNFT(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT? {
+  priv fun pickBonusNFT(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT {
     let tiersCollection =
       self.account.borrow<&TiersCollection>(
         from: self.BonusTiersCollectionStoragePath
@@ -101,7 +96,7 @@ pub contract ChainmonstersFoundation {
       return <- collection.withdraw(withdrawID: ids[index])
     }
 
-    return nil
+    panic("No bonus NFTs available")
   }
 
   /**
@@ -110,7 +105,7 @@ pub contract ChainmonstersFoundation {
    * RARE rolls: 2% chance to upgrade to LEGENDARY, 8% chance to upgrade to EPIC
    * EPIC rolls: 2% chance to upgrade to LEGENDARY
    */
-  priv fun rollForUpgrade(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT? {
+  priv fun rollForUpgrade(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT {
     pre {
       tier != Tier.LEGENDARY: "Can't roll for LEGENDARY upgrade"
     }
@@ -120,24 +115,24 @@ pub contract ChainmonstersFoundation {
 
     log("Rolled: ".concat(roll.toString()))
 
-    var nft: @NonFungibleToken.NFT? <- nil
-
     if (roll <= 2) {
       // Every RARE and EPIC roll has a 2% chance of a LEGENDARY upgrade
-      nft <-! self.pickBonusNFT(rng: rng, tier: Tier.LEGENDARY)
+      let nft <- self.pickBonusNFT(rng: rng, tier: Tier.LEGENDARY)
 
-      emit UpgradeRolled(nftID: nft?.id, tier: Tier.LEGENDARY.rawValue)
+      emit UpgradeRolled(nftID: nft.id, tier: Tier.LEGENDARY.rawValue)
+
+      return <- nft
     } else if (tier == Tier.RARE && roll <= 8) {
       // RARE rolls have a 8% chance of an EPIC upgrade
-      nft <-! self.pickBonusNFT(rng: rng, tier: Tier.EPIC)
+      let nft <- self.pickBonusNFT(rng: rng, tier: Tier.EPIC)
 
-      emit UpgradeRolled(nftID: nft?.id, tier: Tier.EPIC.rawValue)
+      emit UpgradeRolled(nftID: nft.id, tier: Tier.EPIC.rawValue)
+
+      return <- nft
     } else {
       // Otherwise just return the reserved item
-      nft <-! self.pickReservedNFT(rng: rng, tier: tier)
+      return <- self.pickReservedNFT(rng: rng, tier: tier)
     }
-
-    return <- nft
   }
 
   /**
@@ -226,7 +221,6 @@ pub contract ChainmonstersFoundation {
      */
     pub fun sellBundle(tier: Tier): @NonFungibleToken.NFT {
       let nft <- ChainmonstersFoundation.pickBundle(tier: tier)
-        ?? panic("Could not sell bundle of tier ".concat(tier.rawValue.toString()))
 
       emit BundleSold(nftID: nft.id, tier: tier.rawValue)
 
@@ -252,39 +246,20 @@ pub contract ChainmonstersFoundation {
       switch (tier) {
         // RARE rolls twice for RARE items
         case Tier.RARE:
-          let token1 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE)
-            ?? panic("Could not receive an NFT from the roll")
-          tokens.deposit(token: <- token1)
-
-          let token2 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE)
-            ?? panic("Could not receive an NFT from the roll")
-          tokens.deposit(token: <- token2)
+          tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
+          tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
+        
         // EPIC rolls once for an EPIC item and twice for RARE items
         case Tier.EPIC:
-          let token1 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.EPIC)
-            ?? panic("Could not receive an NFT from the roll")
-          tokens.deposit(token: <- token1)
+          tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.EPIC))
+          tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
+          tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
 
-          let token2 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE)
-            ?? panic("Could not receive an NFT from the roll")
-          tokens.deposit(token: <- token2)
-
-          let token3 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE)
-            ?? panic("Could not receive an NFT from the roll")
-          tokens.deposit(token: <- token3)
         // LEGENDARY receives a guaranteed LEGENDARY item and two RARE items
         case Tier.LEGENDARY:
-          let token1 <- ChainmonstersFoundation.pickReservedNFT(rng: rng, tier: Tier.LEGENDARY)
-            ?? panic("Could not receive an NFT from the roll")
-          tokens.deposit(token: <- token1)
-
-          let token2 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE)
-            ?? panic("Could not receive an NFT from the roll")
-          tokens.deposit(token: <- token2)
-
-          let token3 <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE)
-            ?? panic("Could not receive an NFT from the roll")
-          tokens.deposit(token: <- token3)
+          tokens.deposit(token: <- ChainmonstersFoundation.pickReservedNFT(rng: rng, tier: Tier.LEGENDARY))
+          tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
+          tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
       }
 
       // Check that tokens collection has the correct length
