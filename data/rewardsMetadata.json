@@ -284,7 +284,7 @@
     "description": "Owning your very exclusive fountain not only catches all the attention, it also serves as a nice access to fresh water for the creatures on Ancora."
   },
   {
-    "name": "Wooden Lamp",
+    "name": "Tree Lamp",
     "description": "Having a cozy, warm lamp inside a tree will make any visitors feel just at home!"
   },
   {
@@ -305,6 +305,10 @@
   },
   {
     "name": "Tropical Island",
-    "description": "An exclusive island based on a tropical island. Palms, beaches and warm weather define this unique look and atmosphere"
+    "description": "An exclusive island based on a tropical island. Palms, beaches and warm weather define this unique look and atmosphere."
+  },
+  {
+    "name": "Modern Villa",
+    "description": "An exclusive modern villa as your player house. This home has enough space for all of your furniture and cosmetics and features the highest possible space rank in-game."
   }
 ]
