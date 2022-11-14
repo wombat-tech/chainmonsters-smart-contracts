@@ -108,7 +108,11 @@
         "ChainmonstersProducts",
         {
           "name": "ChainmonstersFoundation",
-          "args": []
+          "args": [
+            { "type": "UInt32", "value": "1" },
+            { "type": "UInt32", "value": "2" },
+            { "type": "UInt32", "value": "3" }
+          ]
         }
       ]
     }

@@ -2,7 +2,18 @@
   "warning": "DO NOT COMMIT PRIVATE KEYS IN THIS FILE!!!!111111",
   "deployments": {
     "mainnet": {
-      "mainnet-rewards-deployer": ["ChainmonstersRewards"],
+      "mainnet-rewards-deployer": [
+        "ChainmonstersRewards",
+        "PRNG",
+        {
+          "name": "ChainmonstersFoundation",
+          "args": [
+            { "type": "UInt32", "value": "64" },
+            { "type": "UInt32", "value": "65" },
+            { "type": "UInt32", "value": "66" }
+          ]
+        }
+      ],
       "mainnet-marketplace-deployer": ["ChainmonstersMarketplace"],
       "mainnet-products-deployer": ["ChainmonstersProducts"]
     }

@@ -248,7 +248,7 @@ pub contract ChainmonstersFoundation {
         case Tier.RARE:
           tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
           tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
-        
+
         // EPIC rolls once for an EPIC item and twice for RARE items
         case Tier.EPIC:
           tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.EPIC))
@@ -298,7 +298,11 @@ pub contract ChainmonstersFoundation {
     }
   }
 
-  init() {
+  init(
+    rareBundleRewardID: UInt32,
+    epicBundleRewardID: UInt32,
+    legendaryBundleRewardID: UInt32
+  ) {
 
     self.BundlesCollectionStoragePath = /storage/cmfBundlesCollection
     self.ReservedTiersCollectionStoragePath =  /storage/cmfReservedTiersCollection
@@ -306,9 +310,9 @@ pub contract ChainmonstersFoundation {
     self.AdminStoragePath = /storage/cmfAdmin
 
     self.bundleRewardTierMapping = {
-      64: Tier.RARE,
-      65: Tier.EPIC,
-      66: Tier.LEGENDARY
+      rareBundleRewardID: Tier.RARE,
+      epicBundleRewardID: Tier.EPIC,
+      legendaryBundleRewardID: Tier.LEGENDARY
     }
 
     let admin <- create Admin()

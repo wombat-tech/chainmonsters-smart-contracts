@@ -7,7 +7,14 @@
         "ChainmonstersMarketplace",
         "ChainmonstersProducts",
         "PRNG",
-        "ChainmonstersFoundation"
+        {
+          "name": "ChainmonstersFoundation",
+          "args": [
+            { "type": "UInt32", "value": "1" },
+            { "type": "UInt32", "value": "2" },
+            { "type": "UInt32", "value": "3" }
+          ]
+        }
       ]
     }
   },

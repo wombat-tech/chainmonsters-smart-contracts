@@ -484,6 +484,44 @@ describe("ChainmonstersFoundation", () => {
 
     expect(error).toContain("Can't roll for LEGENDARY upgrade");
   });
+
+  test("can create a new admin", async () => {
+    const admin = await getServiceAddress();
+    const newAdmin = await getAccountAddress("Alice");
+    const user = await getAccountAddress("Bob");
+
+    await deployContracts();
+
+    await setupFoundation();
+
+    // Create a new admin
+    await shallPass(
+      sendTransaction("foundation/create_admin", [admin, newAdmin])
+    );
+
+    // Give user some FLOW token for the transaction
+    await mintFlow(user, "10000.0");
+
+    // Purchase bundle
+    const [result] = await shallPass(
+      sendTransaction(
+        "foundation/purchase_bundle",
+        [newAdmin, user],
+        [LEGENDARY_TIER, "9999.0", "/storage/flowTokenVault"]
+      )
+    );
+
+    const bundleSoldEvent = result.events.find(
+      (e) => e.type === "A.f8d6e0586b0a20c7.ChainmonstersFoundation.BundleSold"
+    );
+
+    const newNFTID = bundleSoldEvent.data.nftID;
+
+    // Redeem Bundle
+    await shallPass(
+      sendTransaction("foundation/redeem_bundle", [newAdmin, user], [newNFTID])
+    );
+  });
 });
 
 async function deployContracts(): Promise<[{ events: any[] }]> {
@@ -535,9 +573,7 @@ async function deployContracts(): Promise<[{ events: any[] }]> {
   return shallResolve(
     deployContractByName({
       name: "ChainmonstersFoundation",
-      // @TODO: Fix this
-      //args: [["1", "2", "3"]],
-      args: [],
+      args: ["1", "2", "3"],
     })
   );
 }
