@@ -1,5 +1,7 @@
 import {
   deployContractByName,
+  deployContract,
+  getContractCode,
   emulator,
   executeScript,
   getAccountAddress,
@@ -264,25 +266,6 @@ describe("ChainmonstersFoundation", () => {
     expect(rewardIDs).toContain(LEGENDARY_ITEM_REWARD_ID);
   });
 
-  test("rolls 69 with a seed number of 420 :kappa:", async () => {
-    const admin = await getServiceAddress();
-    const user = await getAccountAddress("Alice");
-
-    await deployContracts();
-
-    await setupFoundation();
-
-    const [, , logs] = await shallPass(
-      sendTransaction(
-        "foundation/__tests__/test_redemption",
-        [admin, user],
-        [RARE_TIER, "420"]
-      )
-    );
-
-    expect(logs).toContain("Rolled: 69");
-  });
-
   test("rolls 1; upgrades RARE and returns a LEGENDARY item", async () => {
     const admin = await getServiceAddress();
     const user = await getAccountAddress("Alice");
@@ -296,7 +279,7 @@ describe("ChainmonstersFoundation", () => {
       sendTransaction(
         "foundation/__tests__/test_redemption",
         [admin, user],
-        [RARE_TIER, "590416"]
+        [RARE_TIER, "276236"]
       )
     );
 
@@ -330,7 +313,7 @@ describe("ChainmonstersFoundation", () => {
       sendTransaction(
         "foundation/__tests__/test_redemption",
         [admin, user],
-        [EPIC_TIER, "590416"]
+        [EPIC_TIER, "276236"]
       )
     );
 
@@ -351,7 +334,7 @@ describe("ChainmonstersFoundation", () => {
     expect(rewardID).toEqual(LEGENDARY_ITEM_REWARD_ID);
   });
 
-  test("rolls 6; upgrades RARE and returns an EPIC item", async () => {
+  test("rolls 32; upgrades RARE and returns an EPIC item", async () => {
     const admin = await getServiceAddress();
     const user = await getAccountAddress("Alice");
 
@@ -364,11 +347,11 @@ describe("ChainmonstersFoundation", () => {
       sendTransaction(
         "foundation/__tests__/test_redemption",
         [admin, user],
-        [RARE_TIER, "812409"]
+        [RARE_TIER, "975123"]
       )
     );
 
-    expect(logs).toContain("Rolled: 6");
+    expect(logs).toContain("Rolled: 32");
 
     const upgradeRolledEvent = result.events.find(
       (e) =>
@@ -385,7 +368,7 @@ describe("ChainmonstersFoundation", () => {
     expect(rewardID).toEqual(EPIC_ITEM_REWARD_ID);
   });
 
-  test("rolls 66; returns a RARE item on RARE roll", async () => {
+  test("rolls 566; returns a RARE item on RARE roll", async () => {
     const admin = await getServiceAddress();
     const user = await getAccountAddress("Alice");
 
@@ -402,7 +385,7 @@ describe("ChainmonstersFoundation", () => {
       )
     );
 
-    expect(logs).toContain("Rolled: 66");
+    expect(logs).toContain("Rolled: 566");
 
     const upgradeRolledEvent = result.events.find(
       (e) =>
@@ -425,7 +408,7 @@ describe("ChainmonstersFoundation", () => {
     expect(rewardID).toEqual(RARE_ITEM_REWARD_ID);
   });
 
-  test("rolls 66; returns a EPIC item on EPIC roll", async () => {
+  test("rolls 566; returns a EPIC item on EPIC roll", async () => {
     const admin = await getServiceAddress();
     const user = await getAccountAddress("Alice");
 
@@ -442,7 +425,7 @@ describe("ChainmonstersFoundation", () => {
       )
     );
 
-    expect(logs).toContain("Rolled: 66");
+    expect(logs).toContain("Rolled: 566");
 
     const upgradeRolledEvent = result.events.find(
       (e) =>
@@ -570,10 +553,30 @@ async function deployContracts(): Promise<[{ events: any[] }]> {
     })
   );
 
+  const contractCode: string = await getContractCode({
+    name: "ChainmonstersFoundation",
+  });
+
+  // Ugly fix because contract deployment args are broken 🤮
+  const fixedContractCode = contractCode.replace(
+    `
+  init(
+    rareBundleRewardID: UInt32,
+    epicBundleRewardID: UInt32,
+    legendaryBundleRewardID: UInt32
+  ) {
+`,
+    `
+  init() {
+    let rareBundleRewardID: UInt32 = 1
+    let epicBundleRewardID: UInt32 = 2
+    let legendaryBundleRewardID: UInt32 = 3
+`
+  );
+
   return shallResolve(
-    deployContractByName({
-      name: "ChainmonstersFoundation",
-      args: ["1", "2", "3"],
+    deployContract({
+      code: fixedContractCode,
     })
   );
 }

@@ -110,20 +110,25 @@ pub contract ChainmonstersFoundation {
       tier != Tier.LEGENDARY: "Can't roll for LEGENDARY upgrade"
     }
 
-    // Roll the dice 1 - 100
-    let roll = rng.range(1, 100)
+    // Roll the dice 1 - 1000
+    let roll = rng.range(1, 1000)
 
     log("Rolled: ".concat(roll.toString()))
 
-    if (roll <= 2) {
-      // Every RARE and EPIC roll has a 2% chance of a LEGENDARY upgrade
+    // 1.5% chance to upgrade to LEGENDARY
+    let LEGENDARY_UPGRADE_CHANCE: UInt256 = 15
+    // 6% chance to upgrade to EPIC
+    let EPIC_UPGRADE_CHANCE: UInt256 = 60
+
+    if (roll <= LEGENDARY_UPGRADE_CHANCE) {
+      // Every RARE and EPIC roll has a chance of a LEGENDARY upgrade
       let nft <- self.pickBonusNFT(rng: rng, tier: Tier.LEGENDARY)
 
       emit UpgradeRolled(nftID: nft.id, tier: Tier.LEGENDARY.rawValue)
 
       return <- nft
-    } else if (tier == Tier.RARE && roll <= 8) {
-      // RARE rolls have a 8% chance of an EPIC upgrade
+    } else if (tier == Tier.RARE && roll <= EPIC_UPGRADE_CHANCE) {
+      // RARE rolls have a chance of an EPIC upgrade
       let nft <- self.pickBonusNFT(rng: rng, tier: Tier.EPIC)
 
       emit UpgradeRolled(nftID: nft.id, tier: Tier.EPIC.rawValue)
