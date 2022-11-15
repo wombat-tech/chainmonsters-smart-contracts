@@ -48,7 +48,13 @@
         "mainnet": "1d7e57aa55817448"
       }
     },
-    "PRNG": "./contracts/lib/PRNG.cdc",
+    "PRNG": {
+      "source": "./contracts/lib/PRNG.cdc",
+      "aliases": {
+        "testnet": "75783e3c937304a8",
+        "mainnet": "93615d25d14fa337"
+      }
+    },
     "OnChainMultiSig": {
       "source": "./contracts/lib/OnChainMultiSig.cdc",
       "aliases": {
@@ -94,7 +100,8 @@
     "ChainmonstersFoundation": {
       "source": "./contracts/ChainmonstersFoundation.cdc",
       "aliases": {
-        "testnet": "75783e3c937304a8"
+        "testnet": "75783e3c937304a8",
+        "mainnet": "93615d25d14fa337"
       }
     }
   },
