@@ -102,8 +102,8 @@ pub contract ChainmonstersFoundation {
   /**
    * Rolls for upgrades and returns the resulting NFT
    *
-   * RARE rolls: 2% chance to upgrade to LEGENDARY, 8% chance to upgrade to EPIC
-   * EPIC rolls: 2% chance to upgrade to LEGENDARY
+   * RARE rolls: 1.5% chance to upgrade to LEGENDARY, 6% chance to upgrade to EPIC
+   * EPIC rolls: 1.5% chance to upgrade to LEGENDARY
    */
   priv fun rollForUpgrade(rng: &PRNG.Generator, tier: Tier): @NonFungibleToken.NFT {
     pre {
