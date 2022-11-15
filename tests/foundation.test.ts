@@ -233,7 +233,11 @@ describe("ChainmonstersFoundation", () => {
 
     // Mint an EPIC bundle NFT for the user
     await shallPass(
-      sendTransaction("rewards/admin/mint_nft", [admin], ["3", user])
+      sendTransaction(
+        "rewards/admin/mint_nft",
+        [admin],
+        [LEGENDARY_BUNDLE_REWARD_ID, user]
+      )
     );
 
     // Based on the NFTs minted in `setupFoundation`
