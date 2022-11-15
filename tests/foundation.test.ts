@@ -217,9 +217,9 @@ describe("ChainmonstersFoundation", () => {
       rewardIDs.push(rewardID);
     }
 
-    // Must have at least one EPIC or better reward
+    // Must have at least one EPIC reward
     expect(
-      rewardIDs.some((id) => Number(id) >= Number(EPIC_ITEM_REWARD_ID))
+      rewardIDs.some((id) => Number(id) == Number(EPIC_ITEM_REWARD_ID))
     ).toBe(true);
   });
 

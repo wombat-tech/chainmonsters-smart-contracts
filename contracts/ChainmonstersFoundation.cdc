@@ -254,13 +254,13 @@ pub contract ChainmonstersFoundation {
           tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
           tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
 
-        // EPIC rolls once for an EPIC item and twice for RARE items
+        // EPIC receives a guaranteed EPIC item and rolls for two RARE items
         case Tier.EPIC:
-          tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.EPIC))
+          tokens.deposit(token: <- ChainmonstersFoundation.pickReservedNFT(rng: rng, tier: Tier.EPIC))
           tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
           tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
 
-        // LEGENDARY receives a guaranteed LEGENDARY item and two RARE items
+        // LEGENDARY receives a guaranteed LEGENDARY item and rolls for two RARE items
         case Tier.LEGENDARY:
           tokens.deposit(token: <- ChainmonstersFoundation.pickReservedNFT(rng: rng, tier: Tier.LEGENDARY))
           tokens.deposit(token: <- ChainmonstersFoundation.rollForUpgrade(rng: rng, tier: Tier.RARE))
