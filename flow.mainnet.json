@@ -7,11 +7,7 @@
         "PRNG",
         {
           "name": "ChainmonstersFoundation",
-          "args": [
-            { "type": "UInt32", "value": "64" },
-            { "type": "UInt32", "value": "65" },
-            { "type": "UInt32", "value": "66" }
-          ]
+          "args": []
         }
       ],
       "mainnet-marketplace-deployer": ["ChainmonstersMarketplace"],
