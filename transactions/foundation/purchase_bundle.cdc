@@ -5,7 +5,13 @@ import ChainmonstersFoundation from "../../contracts/ChainmonstersFoundation.cdc
 /**
  * This transaction allows to purchase an NFT with the given tier for a specific price and currency.
  */
-transaction(rawTier: UInt8, price: UFix64, fungibleTokenVaultStoragePath: StoragePath) {
+transaction(
+  rawTier: UInt8,
+  price: UFix64,
+  receiver: Address,
+  fungibleTokenVaultStoragePath: StoragePath,
+  fungibleTokenReceiverPublicPath: PublicPath
+) {
   let paymentVault: @FungibleToken.Vault
   let sellerPaymentReceiver: &{FungibleToken.Receiver}
 
@@ -22,9 +28,9 @@ transaction(rawTier: UInt8, price: UFix64, fungibleTokenVaultStoragePath: Storag
     self.paymentVault <- buyerVault.withdraw(amount: price)
 
     // Borrow reference to the payment receiver
-    self.sellerPaymentReceiver = cmAdmin
-      .borrow<&FungibleToken.Vault>(from: fungibleTokenVaultStoragePath)
-      ?? panic("Could not borrow reference to seller vault")
+    self.sellerPaymentReceiver = getAccount(receiver)
+      .getCapability<&{FungibleToken.Receiver}>(fungibleTokenReceiverPublicPath)
+      .borrow() ?? panic("Could not borrow reference to receiver vault")
 
     // Borrow reference to the ChainmonstersFoundation admin resource
     self.foundationAdminRef = cmAdmin

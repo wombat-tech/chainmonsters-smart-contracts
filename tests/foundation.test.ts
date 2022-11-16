@@ -108,7 +108,13 @@ describe("ChainmonstersFoundation", () => {
       sendTransaction(
         "foundation/purchase_bundle",
         [admin, user],
-        [LEGENDARY_TIER, "9999.0", "/storage/flowTokenVault"]
+        [
+          LEGENDARY_TIER,
+          "9999.0",
+          admin,
+          "/storage/flowTokenVault",
+          "/public/flowTokenReceiver",
+        ]
       )
     );
 
@@ -494,7 +500,13 @@ describe("ChainmonstersFoundation", () => {
       sendTransaction(
         "foundation/purchase_bundle",
         [newAdmin, user],
-        [LEGENDARY_TIER, "9999.0", "/storage/flowTokenVault"]
+        [
+          LEGENDARY_TIER,
+          "9999.0",
+          admin,
+          "/storage/flowTokenVault",
+          "/public/flowTokenReceiver",
+        ]
       )
     );
 
