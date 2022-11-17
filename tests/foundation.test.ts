@@ -521,6 +521,76 @@ describe("ChainmonstersFoundation", () => {
       sendTransaction("foundation/redeem_bundle", [newAdmin, user], [newNFTID])
     );
   });
+
+  test.only("lets the user free mint a token", async () => {
+    const admin = await getServiceAddress();
+    const alice = await getAccountAddress("Alice");
+    const bob = await getAccountAddress("Bob");
+    const chipleaf = await getAccountAddress("Chipleaf");
+
+    await deployContracts();
+
+    // Create Bundle & Item Rewards
+    await shallPass(
+      sendTransaction("foundation/__tests__/create_rewards", [admin])
+    );
+
+    await shallPass(
+      sendTransaction(
+        "rewards/admin/batch_mint_reward",
+        [admin],
+        [RARE_BUNDLE_REWARD_ID, "2", admin]
+      )
+    );
+
+    // Alice can claim
+    {
+      const [result] = await shallPass(
+        sendTransaction("dapperwallet/free_claim", [admin, alice])
+      );
+
+      expect(
+        result.events.some(
+          (e) =>
+            e.type === "A.f8d6e0586b0a20c7.ChainmonstersRewards.Deposit" &&
+            e.data.to === alice
+        )
+      ).toBe(true);
+    }
+
+    // Alice can not claim because she claimed already
+    {
+      const [, error] = await shallRevert(
+        sendTransaction("dapperwallet/free_claim", [admin, alice])
+      );
+
+      expect(error).toContain("User has already claimed a free reward");
+    }
+
+    // Bob can claim
+    {
+      const [result] = await shallPass(
+        sendTransaction("dapperwallet/free_claim", [admin, bob])
+      );
+
+      expect(
+        result.events.some(
+          (e) =>
+            e.type === "A.f8d6e0586b0a20c7.ChainmonstersRewards.Deposit" &&
+            e.data.to === bob
+        )
+      ).toBe(true);
+    }
+
+    // Chipleaf can not claim because the collection is empty :(
+    {
+      const [, error] = await shallRevert(
+        sendTransaction("dapperwallet/free_claim", [admin, chipleaf])
+      );
+
+      expect(error).toContain("No free claim rewards available");
+    }
+  });
 });
 
 async function deployContracts(): Promise<[{ events: any[] }]> {
