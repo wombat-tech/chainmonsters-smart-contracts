@@ -1,6 +1,8 @@
 import NonFungibleToken from "../../contracts/lib/NonFungibleToken.cdc"
 import MetadataViews from "../../contracts/lib/MetadataViews.cdc"
 import ChainmonstersRewards from "../../contracts/ChainmonstersRewards.cdc"
+import DapperUtilityCoin from "../../contracts/lib/DapperUtilityCoin.cdc"
+import FungibleToken from "../../contracts/lib/FungibleToken.cdc"
 
 /**
  * This transaction allows to purchase an NFT with the given rewardID for a specific price.
@@ -9,6 +11,7 @@ transaction() {
   let userCollection: &{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}
   let freeClaimTracker: [Address]
   let userAddress: Address
+  let userIsDapperWallet: Bool
   let nftToClaim: @NonFungibleToken.NFT
   let admin: AuthAccount
 
@@ -31,6 +34,9 @@ transaction() {
     // Get the user's address
     self.userAddress = user.address
 
+    // Check if user has a DUC Receiver capability to confirm that it's a Dapper Wallet
+    self.userIsDapperWallet = user.getCapability<&{FungibleToken.Receiver}>(/public/dapperUtilityCoinReceiver).check()
+
     // Get the free claim tracker array
     self.freeClaimTracker = cmAdmin.load<[Address]>(from: /storage/freeClaimTracker) ?? []
 
@@ -49,6 +55,7 @@ transaction() {
 
   pre {
     !self.freeClaimTracker.contains(self.userAddress): "User has already claimed a free reward"
+    self.userIsDapperWallet: "User is not a Dapper Wallet"
   }
 
   execute {

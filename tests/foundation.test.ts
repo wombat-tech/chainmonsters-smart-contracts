@@ -522,11 +522,12 @@ describe("ChainmonstersFoundation", () => {
     );
   });
 
-  test.only("lets the user free mint a token", async () => {
+  test("lets the user free mint a token", async () => {
     const admin = await getServiceAddress();
     const alice = await getAccountAddress("Alice");
     const bob = await getAccountAddress("Bob");
     const chipleaf = await getAccountAddress("Chipleaf");
+    const ducAdmin = await getAccountAddress("Chainmonster");
 
     await deployContracts();
 
@@ -543,7 +544,24 @@ describe("ChainmonstersFoundation", () => {
       )
     );
 
-    // Alice can claim
+    // Alice can not claim because not a Dapper Wallet
+    {
+      const [, error] = await shallRevert(
+        sendTransaction("dapperwallet/free_claim", [admin, alice])
+      );
+
+      expect(error).toContain("User is not a Dapper Wallet");
+    }
+
+    await shallPass(
+      sendTransaction(
+        "dapperwallet/__tests__/setup_account",
+        [alice],
+        [ducAdmin]
+      )
+    );
+
+    // Alice can now claim
     {
       const [result] = await shallPass(
         sendTransaction("dapperwallet/free_claim", [admin, alice])
@@ -567,6 +585,10 @@ describe("ChainmonstersFoundation", () => {
       expect(error).toContain("User has already claimed a free reward");
     }
 
+    await shallPass(
+      sendTransaction("dapperwallet/__tests__/setup_account", [bob], [ducAdmin])
+    );
+
     // Bob can claim
     {
       const [result] = await shallPass(
@@ -581,6 +603,14 @@ describe("ChainmonstersFoundation", () => {
         )
       ).toBe(true);
     }
+
+    await shallPass(
+      sendTransaction(
+        "dapperwallet/__tests__/setup_account",
+        [chipleaf],
+        [ducAdmin]
+      )
+    );
 
     // Chipleaf can not claim because the collection is empty :(
     {
