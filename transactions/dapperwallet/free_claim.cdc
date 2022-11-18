@@ -5,7 +5,7 @@ import DapperUtilityCoin from "../../contracts/lib/DapperUtilityCoin.cdc"
 import FungibleToken from "../../contracts/lib/FungibleToken.cdc"
 
 /**
- * This transaction allows to purchase an NFT with the given rewardID for a specific price.
+ * This transaction allows to mint a free NFT
  */
 transaction() {
   let userCollection: &{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}
