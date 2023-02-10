@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Kickstarter",
+    "slug": "kickstarter"
+  },
+  {
+    "name": "Alpha",
+    "slug": "alpha"
+  },
+  {
+    "name": "Genesis",
+    "slug": "genesis"
+  },
+  {
+    "name": "Closed Beta",
+    "slug": "closedbeta"
+  },
+  {
+    "name": "Undefined",
+    "slug": "undefined"
+  },
+  {
+    "name": "Foundation",
+    "slug": "foundation"
+  }
+]

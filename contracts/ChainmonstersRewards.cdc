@@ -3,6 +3,8 @@
 // Does not include that much functionality as the only purpose it to mint and store the Presale NFTs.
 
 import NonFungibleToken from "./lib/NonFungibleToken.cdc"
+import FungibleToken from "./lib/FungibleToken.cdc"
+import MetadataViews from "./lib/MetadataViews.cdc"
 
 pub contract ChainmonstersRewards: NonFungibleToken {
 
@@ -89,8 +91,8 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     }
 
 
-    pub resource NFT: NonFungibleToken.INFT {
-        
+    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
+
         // Global unique NFT ID
         pub let id: UInt64
 
@@ -99,12 +101,96 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         init(serialNumber: UInt32, rewardID: UInt32) {
             // Increment the global NFT IDs
             ChainmonstersRewards.totalSupply = ChainmonstersRewards.totalSupply + UInt64(1)
-            
-            self.id = ChainmonstersRewards.totalSupply 
+
+            self.id = ChainmonstersRewards.totalSupply
 
             self.data = NFTData(rewardID: rewardID, serialNumber: serialNumber)
 
             emit NFTMinted(NFTID: self.id, rewardID: rewardID, serialNumber: self.data.serialNumber)
+        }
+
+        pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>(),
+                Type<MetadataViews.Edition>(),
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.Serial>()
+            ]
+        }
+
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            let externalRewardMetadata = ChainmonstersRewards.getExternalRewardMetadata(rewardID: self.data.rewardID)
+
+            let name = externalRewardMetadata != nil ? externalRewardMetadata!["name"] ?? "Chainmonsters Reward #".concat(self.data.rewardID.toString()) : "Chainmonsters Reward #".concat(self.data.rewardID.toString())
+            let description = externalRewardMetadata != nil ? externalRewardMetadata!["description"] ?? "A Chainmonsters Reward" : "A Chainmonsters Reward"
+
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: name,
+                        description: description,
+                        thumbnail: MetadataViews.HTTPFile(
+                            url: "https://chainmonsters.com/images/rewards/".concat(self.data.rewardID.toString()).concat(".png")
+                        )
+                    )
+                case Type<MetadataViews.Edition>():
+                    return MetadataViews.Edition(
+                        name: name,
+                        number: UInt64(self.data.serialNumber),
+                        max: UInt64(ChainmonstersRewards.getNumRewardsMinted(rewardID: self.data.rewardID)!)
+                    )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "Chainmonsters Rewards",
+                        description: "Chainmonsters is a massive multiplayer online RPG where you catch, battle, trade, explore, and combine different types of monsters and abilities to create strong chain reactions! No game subscription required. Explore the vast lands of Ancora together with your friends on Steam, iOS and Android!",
+                        externalURL: MetadataViews.ExternalURL("https://chainmonsters.com"),
+                        squareImage: MetadataViews.Media(
+                            file: MetadataViews.HTTPFile(
+                                url: "https://chainmonsters.com/images/chipleaf.png"
+                            ),
+                            mediaType: "image/png"
+                        ),
+                        bannerImage: MetadataViews.Media(
+                            file: MetadataViews.HTTPFile(
+                                url: "https://chainmonsters.com/images/bg.jpg"
+                            ),
+                            mediaType: "image/jpeg"
+                        ),
+                        socials: {
+                            "twitter": MetadataViews.ExternalURL("https://twitter.com/chainmonsters"),
+                            "discord": MetadataViews.ExternalURL("https://discord.gg/chainmonsters")
+                        }
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL("https://chainmonsters.com/rewards/".concat(self.data.rewardID.toString()))
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: /storage/ChainmonstersRewardCollection,
+                        publicPath: /public/ChainmonstersRewardCollection,
+                        providerPath: /private/ChainmonstersRewardsCollectionProvider,
+                        publicCollection: Type<&ChainmonstersRewards.Collection{ChainmonstersRewards.ChainmonstersRewardCollectionPublic}>(),
+                        publicLinkedType: Type<&ChainmonstersRewards.Collection{ChainmonstersRewards.ChainmonstersRewardCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&ChainmonstersRewards.Collection{ChainmonstersRewards.ChainmonstersRewardCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @ChainmonstersRewards.Collection {
+                            return <- (ChainmonstersRewards.createEmptyCollection() as! @ChainmonstersRewards.Collection)
+                        })
+                    )
+                case Type<MetadataViews.Royalties>():
+                    return MetadataViews.Royalties([
+                        MetadataViews.Royalty(
+                            receiver: ChainmonstersRewards.account.getCapability<&{FungibleToken.Receiver}>(MetadataViews.getRoyaltyReceiverPublicPath()),
+                            cut: 0.05,
+                            description: "Chainmonsters Platform Cut"
+                        )
+                    ])
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(self.id)
+            }
+
+            return nil
         }
     }
 
@@ -120,14 +206,14 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             // If the result isn't nil, the id of the returned reference
             // should be the same as the argument to the function
             post {
-                (result == nil) || (result?.id == id): 
+                (result == nil) || (result?.id == id):
                     "Cannot borrow Reward reference: The ID of the returned reference is incorrect"
             }
         }
     }
 
 
-    pub resource Collection: ChainmonstersRewardCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: ChainmonstersRewardCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an `UInt64` ID field
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
@@ -140,11 +226,11 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
 
             // Remove the nft from the Collection
-            let token <- self.ownedNFTs.remove(key: withdrawID) 
+            let token <- self.ownedNFTs.remove(key: withdrawID)
                 ?? panic("Cannot withdraw: Reward does not exist in the collection")
 
             emit Withdraw(id: token.id, from: self.owner?.address)
-            
+
             // Return the withdrawn token
             return <-token
         }
@@ -160,12 +246,12 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         pub fun batchWithdraw(ids: [UInt64]): @NonFungibleToken.Collection {
             // Create a new empty Collection
             var batchCollection <- create Collection()
-            
+
             // Iterate through the ids and withdraw them from the Collection
             for id in ids {
                 batchCollection.deposit(token: <-self.withdraw(withdrawID: id))
             }
-            
+
             // Return the withdrawn tokens
             return <-batchCollection
         }
@@ -227,6 +313,12 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             }
         }
 
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
+            let rewardNFT = nft as! &ChainmonstersRewards.NFT
+            return rewardNFT
+        }
+
         destroy() {
             destroy self.ownedNFTs
         }
@@ -240,7 +332,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
     //
 	pub resource Admin {
 
-        
+
         // creates a new Reward struct and stores it in the Rewards dictionary
         // Parameters: metadata: the name of the reward
         pub fun createReward(metadata: String, totalSupply: UInt32): UInt32 {
@@ -262,7 +354,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
             return newID
         }
-        
+
         // consuming an NFT (item) to be converted to in-game economy
         pub fun consumeItem(token: @NonFungibleToken.NFT, playerId: String) {
             let token <- token as! @ChainmonstersRewards.NFT
@@ -287,7 +379,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
 
 		// mintReward mints a new NFT-Reward with a new ID
-		// 
+		//
 		pub fun mintReward(rewardID: UInt32): @NFT {
             pre {
 
@@ -312,8 +404,8 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             return <-newReward
 		}
 
-        // batchMintReward mints an arbitrary quantity of Rewards 
-        // 
+        // batchMintReward mints an arbitrary quantity of Rewards
+        //
         pub fun batchMintReward(rewardID: UInt32, quantity: UInt64): @Collection {
             let newCollection <- create Collection()
 
@@ -330,7 +422,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             pre {
                 ChainmonstersRewards.rewardDatas[rewardID] != nil: "Cannot borrow Reward: The Reward doesn't exist"
             }
-            
+
             // Get a reference to the Set and return it
             // use `&` to indicate the reference to the object and type
             return (&ChainmonstersRewards.rewardDatas[rewardID] as &Reward?)!
@@ -383,12 +475,16 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         return ChainmonstersRewards.rewardDatas[rewardID]?.season
     }
 
+    // returns the maximum supply of a reward
+    pub fun getRewardMaxSupply(rewardID: UInt32): UInt32? {
+        return ChainmonstersRewards.rewardSupplies[rewardID]
+    }
 
      // isRewardLocked returns a boolean that indicates if a Reward
     //                      can no longer be minted.
-    // 
+    //
     // Parameters: rewardID: The id of the Set that is being searched
-    //             
+    //
     //
     // Returns: Boolean indicating if the reward is locked or not
     pub fun isRewardLocked(rewardID: UInt32): Bool? {
@@ -408,6 +504,28 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         let amount = ChainmonstersRewards.numberMintedPerReward[rewardID]
 
         return amount
+    }
+
+    // Get reward metadata from the contract owner storage, can be upgraded
+    pub fun getExternalSeasonMetadata(seasonID: UInt32): {String: String}? {
+        let data = self.account.getCapability<&[{ String: String }]>(/public/ChainmonstersSeasonsMetadata).borrow()
+
+        if (data == nil) {
+            return nil
+        }
+
+        return data![seasonID]
+    }
+
+    // Get reward metadata from the contract owner storage, can be upgraded
+    pub fun getExternalRewardMetadata(rewardID: UInt32): {String: String}? {
+        let data = self.account.getCapability<&[{ String: String }]>(/public/ChainmonstersRewardsMetadata).borrow()
+
+        if (data == nil) {
+            return nil
+        }
+
+        return data![rewardID]
     }
 
 
@@ -434,6 +552,3 @@ pub contract ChainmonstersRewards: NonFungibleToken {
         emit ContractInitialized()
 	}
 }
-
- 
- 

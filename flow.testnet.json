@@ -5,7 +5,12 @@
       "testnet-deployer": [
         "ChainmonstersRewards",
         "ChainmonstersMarketplace",
-        "ChainmonstersProducts"
+        "ChainmonstersProducts",
+        "PRNG",
+        {
+          "name": "ChainmonstersFoundation",
+          "args": []
+        }
       ]
     }
   },

@@ -2,7 +2,14 @@
   "warning": "DO NOT COMMIT PRIVATE KEYS IN THIS FILE!!!!111111",
   "deployments": {
     "mainnet": {
-      "mainnet-rewards-deployer": ["ChainmonstersRewards"],
+      "mainnet-rewards-deployer": [
+        "ChainmonstersRewards",
+        "PRNG",
+        {
+          "name": "ChainmonstersFoundation",
+          "args": []
+        }
+      ],
       "mainnet-marketplace-deployer": ["ChainmonstersMarketplace"],
       "mainnet-products-deployer": ["ChainmonstersProducts"]
     }
@@ -18,6 +25,10 @@
     },
     "mainnet-products-deployer": {
       "address": "ec93a9a9ab336096",
+      "key": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "mainnet-foundation-admin": {
+      "address": "d0beb62f778462a9",
       "key": "0000000000000000000000000000000000000000000000000000000000000000"
     }
   }

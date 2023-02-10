@@ -2,6 +2,7 @@
 !.env.example
 .vscode
 node_modules
+/built
 
 # Flow CLI
 flowdb/

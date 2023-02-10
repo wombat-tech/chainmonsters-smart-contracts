@@ -48,7 +48,7 @@ pub resource Reward {
 
     // the ID of the Reward that the NFT comes from
     pub let rewardID: UInt32
-    
+
     // the game-season this reward belongs to
     // Kickstarter NFTs are Pre-Season and equal 0
     pub let season: UInt32
@@ -88,3 +88,26 @@ The smart contract and its various resources will emit certain events that show 
 ## Chainmonsters Marketplace
 
 An in-game marketplace is in the works and will be published here once available.
+
+## Set external Chainmonsters Rewards Metadata
+
+The new contract allows to set rewards metadata on the contract owner storage:
+
+```
+$ flow transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(yarn --silent json-minify data/rewardsMetadata.json)"
+$ flow transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(yarn --silent json-minify data/seasonsMetadata.json)"
+```
+
+This command reads the metadata in `data/rewardsMetadata.json`. It expects a format of `[ { "name": "Reward Name", "description": "Reward Description" } ]` the index in the array maps to the rewardID. Index 0 is "not in use"
+
+### Live transactions
+
+```
+# Testnet
+$ flow -f flow.json -f flow.testnet.json --network testnet transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(yarn --silent json-minify data/rewardsMetadata.json)" --signer testnet-deployer
+$ flow -f flow.json -f flow.testnet.json --network testnet transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(yarn --silent json-minify data/seasonsMetadata.json)" --signer testnet-deployer
+
+# Mainnet
+$ flow -f flow.json -f flow.mainnet.json --network mainnet transactions send transactions/rewardsMetadata/setRewardsMetadata.cdc "$(yarn --silent json-minify data/rewardsMetadata.json)" --signer mainnet-rewards-deployer
+$ flow -f flow.json -f flow.mainnet.json --network mainnet transactions send transactions/rewardsMetadata/setSeasonsMetadata.cdc "$(yarn --silent json-minify data/seasonsMetadata.json)" --signer mainnet-rewards-deployer
+```
