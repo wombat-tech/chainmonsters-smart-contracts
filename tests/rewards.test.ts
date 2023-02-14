@@ -2,6 +2,7 @@ import {
   deployContractByName,
   emulator,
   executeScript,
+  getAccountAddress,
   getServiceAddress,
   init,
   sendTransaction,
@@ -187,6 +188,69 @@ describe("ChainmonstersRewards", () => {
       medias: null,
       license: null,
     });
+  });
+
+  test("can mint reward & show metadata", async () => {
+    await deployContracts();
+
+    const Alice = await getAccountAddress("Alice");
+
+    const admin = await getServiceAddress();
+
+    // Set up account
+    await shallPass(sendTransaction("rewards/setup_account", [Alice]));
+
+    // Create reward
+    await shallPass(
+      sendTransaction(
+        "rewards/admin/create_reward",
+        [admin],
+        ["First reward", "1000"]
+      )
+    );
+
+    // Mint NFTs
+    await shallPass(
+      sendTransaction(
+        "rewards/admin/batch_mint_reward",
+        [admin],
+        ["1", "100", Alice],
+        9999
+      )
+    );
+
+    const [beforeSupply] = await executeScript(
+      "rewards/get_collection_supply",
+      [Alice]
+    );
+
+    expect(beforeSupply).toEqual("100");
+
+    // Migrate collection
+    const [{ events }] = await shallPass(
+      sendTransaction(
+        "rewards/migration/migrate_collection",
+        [Alice, admin],
+        ["123", "0x1337"],
+        9999
+      )
+    );
+
+    const migrationEvents = events.filter((e) =>
+      e.type.endsWith("ChainmonstersRewards.ItemMigrated")
+    );
+
+    // Has 100 withdraw events
+    expect(migrationEvents).toHaveLength(100);
+    // Has correct data
+    expect(migrationEvents[0].data.playerId).toEqual("123");
+    expect(migrationEvents[0].data.imxWallet).toEqual("0x1337");
+
+    const [afterSupply] = await executeScript("rewards/get_collection_supply", [
+      Alice,
+    ]);
+
+    expect(afterSupply).toEqual("0");
   });
 });
 

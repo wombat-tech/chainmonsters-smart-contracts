@@ -20,6 +20,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
     pub event ItemConsumed(itemID: UInt64, playerId: String)
     pub event ItemClaimed(itemID: UInt64, playerId: String, uid: String)
+    pub event ItemMigrated(itemID: UInt64, playerId: String, imxWallet: String)
 
     pub var nextRewardID: UInt32
 
@@ -362,6 +363,17 @@ pub contract ChainmonstersRewards: NonFungibleToken {
             let id: UInt64 = token.id
 
             emit ItemConsumed(itemID: id, playerId: playerId)
+
+            destroy token
+        }
+
+        // removing an NFT (item) from the rewards collection to be migrated to the new IMX contracts
+        pub fun migrateItem(token: @NonFungibleToken.NFT, playerId: String, imxWallet: String) {
+            let token <- token as! @ChainmonstersRewards.NFT
+
+            let id: UInt64 = token.id
+
+            emit ItemMigrated(itemID: id, playerId: playerId, imxWallet: imxWallet)
 
             destroy token
         }
