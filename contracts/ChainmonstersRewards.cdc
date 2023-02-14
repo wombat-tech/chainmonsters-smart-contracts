@@ -20,7 +20,7 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
     pub event ItemConsumed(itemID: UInt64, playerId: String)
     pub event ItemClaimed(itemID: UInt64, playerId: String, uid: String)
-    pub event ItemMigrated(itemID: UInt64, playerId: String, imxWallet: String)
+    pub event ItemMigrated(itemID: UInt64, rewardID: UInt32, serialNumber: UInt32, playerId: String, imxWallet: String)
 
     pub var nextRewardID: UInt32
 
@@ -373,7 +373,13 @@ pub contract ChainmonstersRewards: NonFungibleToken {
 
             let id: UInt64 = token.id
 
-            emit ItemMigrated(itemID: id, playerId: playerId, imxWallet: imxWallet)
+            emit ItemMigrated(
+                itemID: id,
+                rewardID: token.data.rewardID,
+                serialNumber: token.data.serialNumber,
+                playerId: playerId,
+                imxWallet: imxWallet
+            )
 
             destroy token
         }

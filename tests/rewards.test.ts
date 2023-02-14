@@ -190,7 +190,7 @@ describe("ChainmonstersRewards", () => {
     });
   });
 
-  test("can mint reward & show metadata", async () => {
+  test("can migrate an item", async () => {
     await deployContracts();
 
     const Alice = await getAccountAddress("Alice");
@@ -245,6 +245,8 @@ describe("ChainmonstersRewards", () => {
     // Has correct data
     expect(migrationEvents[0].data.playerId).toEqual("123");
     expect(migrationEvents[0].data.imxWallet).toEqual("0x1337");
+    expect(migrationEvents[0].data.rewardID).toEqual("1");
+    expect(migrationEvents[0].data.serialNumber).toEqual("65");
 
     const [afterSupply] = await executeScript("rewards/get_collection_supply", [
       Alice,
