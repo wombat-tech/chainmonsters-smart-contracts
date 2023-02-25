@@ -254,6 +254,89 @@ describe("ChainmonstersRewards", () => {
 
     expect(afterSupply).toEqual("0");
   });
+
+  test("can migrate collections over 300 nfts", async () => {
+    await deployContracts();
+
+    const Alice = await getAccountAddress("Alice");
+
+    const admin = await getServiceAddress();
+
+    // Set up account
+    await shallPass(sendTransaction("rewards/setup_account", [Alice]));
+
+    // Create reward
+    await shallPass(
+      sendTransaction(
+        "rewards/admin/create_reward",
+        [admin],
+        ["First reward", "1000"]
+      )
+    );
+
+    // Mint NFTs
+    await shallPass(
+      sendTransaction(
+        "rewards/admin/batch_mint_reward",
+        [admin],
+        ["1", "200", Alice],
+        9999
+      )
+    );
+
+    await shallPass(
+      sendTransaction(
+        "rewards/admin/batch_mint_reward",
+        [admin],
+        ["1", "200", Alice],
+        9999
+      )
+    );
+
+    await shallPass(
+      sendTransaction(
+        "rewards/admin/batch_mint_reward",
+        [admin],
+        ["1", "200", Alice],
+        9999
+      )
+    );
+
+    const [beforeSupply] = await executeScript(
+      "rewards/get_collection_supply",
+      [Alice]
+    );
+
+    expect(beforeSupply).toEqual("600");
+
+    // Migrate collection
+    const [{ events }] = await shallPass(
+      sendTransaction(
+        "rewards/migration/migrate_collection",
+        [Alice, admin],
+        ["123", "0x1337"],
+        9999
+      )
+    );
+
+    const migrationEvents = events.filter((e) =>
+      e.type.endsWith("ChainmonstersRewards.ItemMigrated")
+    );
+
+    // Has 300 withdraw events
+    expect(migrationEvents).toHaveLength(300);
+    // Has correct data
+    expect(migrationEvents[0].data.playerId).toEqual("123");
+    expect(migrationEvents[0].data.imxWallet).toEqual("0x1337");
+    expect(migrationEvents[0].data.rewardID).toEqual("1");
+    expect(migrationEvents[0].data.serialNumber).toEqual("559");
+
+    const [afterSupply] = await executeScript("rewards/get_collection_supply", [
+      Alice,
+    ]);
+
+    expect(afterSupply).toEqual("300");
+  });
 });
 
 async function deployContracts(): Promise<[{ events: any[] }]> {

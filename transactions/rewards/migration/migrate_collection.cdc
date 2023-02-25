@@ -1,5 +1,4 @@
 import ChainmonstersRewards from "../../../contracts/ChainmonstersRewards.cdc"
-import NonFungibleToken from "../../../contracts/lib/NonFungibleToken.cdc"
 
 // Migrates the whole collection
 transaction(playerId: String, imxWallet: String) {
@@ -17,7 +16,11 @@ transaction(playerId: String, imxWallet: String) {
   }
 
   execute {
-    for id in self.collectionRef.getIDs() {
+    let limit = 300
+    for index, id in self.collectionRef.getIDs() {
+      if index >= limit {
+        break
+      }
       let token <- self.collectionRef.withdraw(withdrawID: id)
       self.admin.migrateItem(token: <- token, playerId: playerId, imxWallet: imxWallet)
     }
